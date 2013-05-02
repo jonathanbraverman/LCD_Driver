@@ -1,0 +1,133 @@
+            NAME    	Ring_buffer                ; module name
+
+            PUBLIC      b_write_status_flag        ; make the variable labels visible outside this file
+	    PUBLIC	b_read_status_flag
+	    PUBLIC	b_message_type
+	    PUBLIC	b_message_data
+	    PUBLIC      INITBUFVARS		   ; Make subroutine labels visible outside of this file
+            PUBLIC  	WRITEBUF                   
+	    PUBLIC  	READBUF	
+		  
+_byte        EQU 1                       	   ; Size of a byte is one RAM unit
+_word        EQU 2                       	   ; Size of a word is two RAM units
+
+	   ORG     	0x0200			   ; Declare variables at the start of RAM
+
+b_ring_buffer           DS  (_byte * 128)          ; 8-bit 128 element array used as circular buffer  
+b_write_ptr             DS  _byte                  ; 1 byte element used as the write pointer
+b_read_ptr              DS  _byte                  ; 1 byte element used as the read pointer
+b_write_status_flag     DS  _byte                  ; 1 byte element used as a write sub status flag for buffer full
+b_read_status_flag      DS  _byte                  ; 1 byte element used as a read sub status flag for buffer full
+b_message_type          DS  _byte                  ; 1 byte element to store and pass message type as control or display data
+b_message_data          DS  _byte                  ; 1 byte element to store and pass the actual data to send
+              
+                                        
+            RSEG        CODE                       ; Place program code in 'CODE' segment
+
+;-------------------------------------------------------------------------------; Purpose of Function – Initialize ring buffer subroutine variables
+INITBUFVARS									; IN: None		
+;-------------------------------------------------------------------------------; OUT: None
+
+	    mov.b    #00h, &b_write_ptr            ; Initialize Write pointer to 0
+            mov.b    #00h, &b_read_ptr             ; Initialize Read pointer to 0
+            mov.b    #00h, &b_write_status_flag    ; Initialize the Write status flag to 0
+            mov.b    #00h, &b_read_status_flag     ; Initialize the Read status flag to 0
+            NOP
+	    RET
+
+;-------------------------------------------------------------------------------; Purpose of Function – Write a word to the buffer
+WRITEBUF:                                                                      ; IN: R7 (Message)
+;-------------------------------------------------------------------------------; OUT: b_write_status_flag
+
+            PUSH     R11                           ; Protect contents of R11
+            PUSH     R12                           ; Protect contents of R12
+            PUSH     R13                           ; Protect contents of R13
+	    PUSH     R14			   ; Protect contents of R14
+            mov.b    &b_write_ptr, R12             ; Move contents of Write pointer to R12 for comparison
+	    mov.b    &b_write_ptr, R14		   ; Move contents of Write pointer to R14 for comparison	  
+            mov.b    &b_read_ptr, R13              ; Move contents of the Read pointer to R13 for comparison
+            sub.w    R13, R12                      ; Write pointer - Read pointer => R12
+            cmp.w    #126, R12                     ; Test if Write pointer - Read pointer = 126
+            JZ       Buffer_full                   ; The buffer is full if Write pointer is at an offset of 126 and the Read pointer is at 0
+            sub.w    R14, R13                      ; Read pointer - Write pointer => R13
+            cmp.w    #2, R13                       ; Test if Read pointer - Write pointer = 2
+            JZ       Buffer_full                   ; The buffer is full if the Read pointer is 2 greater than the Write pointer
+            JMP      Write_ready                   ; The buffer is ready to to accept data if it is not full 
+            
+Write_ready:
+            mov.b    #00h, &b_write_status_flag    ; clear flag if the buffer is ready
+            mov.b    &b_write_ptr, R11             ; Move Write pointer to R11 to be used for writing to the buffer
+            mov.w    R7, 0x200(R11)                ; Write data to the buffer at the location of 0x200(Write pointer)
+            add.b    #2, &b_write_ptr              ; Increment the Write pointer by 2 to point to the next word location of the buffer
+            bit.b    #0x80, &b_write_ptr           ; Test is the Write pointer is out of bounds
+            JC       Fix_Write_ptr                 ; Jump to reset the Write pointer back to zero
+            JMP      Write_end            
+            
+Buffer_full:
+            mov.b    #01h, &b_write_status_flag    ; Set a flag if the buffer is full
+            JMP      Write_end  
+            
+Fix_Write_ptr:
+            mov.b    #0, &b_write_ptr              ; Reset the Write pointer to 0 since it has reached the upper limit of the buffer
+            JMP      Write_end  
+            
+Write_end:
+	    POP      R14
+            POP      R13
+            POP      R12
+            POP      R11
+            RET         
+
+;-------------------------------------------------------------------------------; Purpose of Function – Read a word from the buffer
+ READBUF:									; IN: None
+;-------------------------------------------------------------------------------; OUT: b_read_status_flag, b_message_type, b_message_data
+
+            PUSH     R10                           ; Protect contents of R10
+            PUSH     R11                           ; Protect contents of R11
+            PUSH     R13                           ; Protect contents of R13
+            mov.b    &b_write_ptr, R11             ; Move the Write pointer value to R11 to be used for comparison
+            mov.b    &b_read_ptr, R13              ; Move the Read pointer value to R13 to be used for comparison
+            sub.w    R11, R13                      ; Write pointer - Read pointer => R13
+            cmp.w    #0, R13                       ; Test if Write pointer - Read pointer = 0
+            JZ       Buffer_empty                  ; The buffer is empty is the Write pointer is equal to the Read pointer
+            JMP      Read_ready
+            
+Read_ready:
+            mov.b    &b_read_ptr, R10              ; Move Read pointer to R10 to be used for reading from the buffer
+            mov.b    0x200(R10), &b_message_type   ; Move value at location 0x200(Read pointer) into b_message_type to be sent over SPI
+            inc.b    &b_read_ptr                   ; Increment the pointer to point to the next sequential byte
+            mov.b    &b_read_ptr, R10              ; Move Read pointer to R10 to be used for reading from the buffer
+            mov.b    0x200(R10), &b_message_data   ; Move value at location 0x200(Read pointer) into b_message_data to be sent over SPI
+            inc.b    &b_read_ptr                   ; Increment the Read pointer by 1 to point to the next byte location of the buffer
+            bit.b    #0x80, &b_read_ptr            ; Test if the Read pointer is out of bounds
+            JC       Fix_Read_ptr                  ; Jump to reset the Read pointer back to zero
+            JMP      Test_ptrs			   ; Test if the last message has been read 
+            
+Buffer_empty:
+            mov.b    #00h, &b_read_status_flag     ; Set flag to 0 indicating the buffer is empty
+            JMP      Read_end
+            
+Fix_Read_ptr:
+            mov.b    #0, &b_read_ptr               ; Reset the Read pointer to 0 since it has reached the upper limit of the buffer
+            JMP      Test_ptrs                     ; Test if the last message has been read 
+            
+Test_ptrs:
+            mov.b    &b_write_ptr, R11             ; Move the Write pointer value to R11 to be used for comparison
+            mov.b    &b_read_ptr, R13              ; Move the Read pointer value to R13 to be used for comparison
+            sub.w    R11, R13                      ; Write pointer - Read pointer => R13
+            cmp.w    #0, R13                       ; Test is Write pointer - Read_ptr = 0
+            JNZ      Still_data                    ; Jump to Still_data if there is data remaining in the buffer
+            mov.b    #01h, &b_read_status_flag     ; Set flag to 1 indicating the last message has just been read out
+            JMP      Read_end 
+            
+Still_data:
+            mov.b    #02h, &b_read_status_flag     ; Set flag to 2 indicating remaining data in the buffer
+            JMP      Read_end
+            
+Read_end:
+            POP      R13
+            POP      R11
+            POP      R10
+            RET
+;--------------------------------------------------------------------------------
+END

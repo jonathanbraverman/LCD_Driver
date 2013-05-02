@@ -1,0 +1,241 @@
+###############################################################################
+#                                                                             #
+#     IAR Assembler V5.50.1.50465/W32  for MSP430 25/Apr/2013  21:11:02       #
+#     Copyright 1996-2012 IAR Systems AB.                                     #
+#                                                                             #
+#           Target option =  MSP430                                           #
+#           Source file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\LCDCONTROL.s43#
+#           List file     =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\LCDCONTROL.lst#
+#           Object file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\LCDCONTROL.r43#
+#           Command line  =  C:\Users\157_13\Pictures\Module Construction\multiple module\LCDCONTROL.s43 #
+#                            -OC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\ #
+#                            -s+ -M<> -w+                                     #
+#                            -LC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\ #
+#                            -cE -t8 -r -D__MSP430G2553__                     #
+#                            -IC:\Program Files (x86)\IAR Systems\Embedded Workbench 6.4 Kickstart\430\INC\ #
+#                                                                             #
+###############################################################################
+
+      1    000000              #include "msp430.h"                     ;
+                                #define controlled include file
+      2    000000              
+      3    000000                      NAME    LCDCONTROL               ;
+                                module name
+      4    000000                      EXTERN  CREATEMESSAGE            ;
+                                                                         declar
+                                                                        e an
+                                                                         extern
+                                                                        ally
+                                                                         (other
+                                                                         file)
+                                                                         define
+                                                                        d
+                                                                         subrou
+                                                                        tine
+      5    000000                      EXTERN  b_invalid_msg           ;
+                                                                        declare
+                                                                        an
+                                                                        externa
+                                                                       lly
+                                                                        (other
+                                                                        file)
+                                                                        defined
+                                                                        variabl
+                                                                       e
+      6    000000                      
+      7    000000                      PUBLIC  InitializeLCD               ;
+  make the main label visible outside this module
+      8    000000                      PUBLIC  Clear
+      9    000000                      PUBLIC  SetAddress
+     10    000000                      RSEG    CODE                    ; place
+  program in 'CODE' segment
+     11    000000              ;-----------------------------------------------
+                               --------------------------------
+     12    000000              InitializeLCD:
+     13    000000              ;-----------------------------------------------
+                               --------------------------------
+     14    000000              
+     15    000000 4743                 mov.b #0, R7                    ;0 to R7
+                                                                        =
+                                                                        Control
+                                                                        Message
+                                                                        being
+                                                                        sent
+     16    000002              ;Initializing by Instruction
+     17    000002 78403000             mov.b #0x30, R8                
+                                                                        ;Functi
+                                                                       on Set
+                                                                        (0 0 1
+                                                                        DL N DH
+                                                                        0
+                                                                        IS)
+     18    000006 B012....             Call #CREATEMESSAGE
+     19    00000A D293....             cmp.b #01, &b_invalid_msg
+     20    00000E 3924                 jeq Error
+     21    000010                      
+     22    000010 78403000             mov.b #0x30, R8                 ;DL =
+                                                                        Select
+                                                                        8 bit
+                                                                        or 4
+                                                                        bit bus
+                                                                        mode (1
+                                                                        = 8
+                                                                        bit)
+     23    000014 B012....             Call #CREATEMESSAGE
+     24    000018 D293....             cmp.b #01, &b_invalid_msg
+     25    00001C 3224                 jeq Error 
+     26    00001E                      
+     27    00001E 78403000             mov.b #0x30, R8                 ;N =
+                                                                        "High",
+                                                                        2 line
+                                                                        display
+                                                                        mode.
+                                                                        "Low",
+                                                                        1 line
+                                                                        display
+                                                                        mode
+     28    000022 B012....             Call #CREATEMESSAGE
+     29    000026 D293....             cmp.b #01, &b_invalid_msg
+     30    00002A 2B24                 jeq Error
+     31    00002C                      
+     32    00002C 78403900             mov.b #0x39, R8                 ;DH =
+                                                                        Double
+                                                                        Height
+                                                                        Font,
+                                                                        "High"
+                                                                        is
+                                                                        double
+                                                                        height
+                                                                        "Low"
+                                                                        is
+                                                                        normal
+     33    000030                                                      ;IS =
+                                Normal or Extension instruction select
+     34    000030 B012....             Call #CREATEMESSAGE
+     35    000034 D293....             cmp.b #01, &b_invalid_msg
+     36    000038 2424                 jeq Error
+     37    00003A                      
+     38    00003A                      
+     39    00003A 78401400             mov.b #0x14, R8                
+                                                                        ;Intern
+                                                                       al OSC
+                                                                        Frequen
+                                                                       cy
+     40    00003E B012....             Call #CREATEMESSAGE
+     41    000042 D293....             cmp.b #01, &b_invalid_msg
+     42    000046 1D24                 jeq Error
+     43    000048                    
+     44    000048 78405600             mov.b #0x56, R8           ;Power
+                                                                  Control
+     45    00004C B012....             Call #CREATEMESSAGE  
+     46    000050 D293....             cmp.b #01, &b_invalid_msg
+     47    000054 1624                 jeq Error
+     48    000056                      
+     49    000056 78406D00             mov.b #0x6D, R8           ;Follower
+                                                                  Control
+     50    00005A B012....             Call #CREATEMESSAGE
+     51    00005E D293....             cmp.b #01, &b_invalid_msg
+     52    000062 0F24                 jeq Error
+     53    000064                     
+     54    000064 78407000             mov.b #0x70, R8           ;Contrast
+                                                                  Set
+     55    000068 B012....             Call #CREATEMESSAGE
+     56    00006C D293....             cmp.b #01, &b_invalid_msg
+     57    000070 0824                 jeq Error
+     58    000072                      
+     59    000072 78400C00             mov.b #0x0C, R8           ;Display
+                                                                  ON/OFF
+                                                                  Control
+     60    000076 B012....             Call #CREATEMESSAGE 
+     61    00007A D293....             cmp.b #01, &b_invalid_msg
+     62    00007E 0124                 jeq Error
+     63    000080               
+     64    000080 3041                 ret
+     65    000082              
+     66    000082              Error:
+     67    000082              
+     68    000082 0343               nop
+     69    000084                    
+     70    000084                    
+     71    000084 3041               ret
+     72    000086                    
+     73    000086              ;-----------------------------------------------
+                               --------------------------------
+     74    000086              Clear:
+     75    000086              ;-----------------------------------------------
+                               --------------------------------
+     76    000086              
+     77    000086 4743                     mov.b #0, R7             ;0 to R7 =
+                                                                     Control
+                                                                     Message
+                                                                     being
+                                                                     sent
+     78    000088 1843                     mov.w   #0x0001, R8      ; sends the
+                                                                     clear
+                                                                     message
+     79    00008A                          
+     80    00008A B012....                 call    #CREATEMESSAGE
+     81    00008E D293....             cmp.b #01, &b_invalid_msg
+     82    000092 F727                 jeq Error
+     83    000094                          
+     84    000094 3041                     ret
+     85    000096                          
+     86    000096                          
+     87    000096                Error1:
+     88    000096              
+     89    000096 0343               nop
+     90    000098                    
+     91    000098                    
+     92    000098 3041               ret
+     93    00009A                        
+     94    00009A              ;-----------------------------------------------
+                               --------------------------------
+     95    00009A              SetAddress: ; Sets the cursor to the right
+                                location
+     96    00009A              ;-----------------------------------------------
+                               --------------------------------
+     97    00009A              
+     98    00009A 809464FF                 cmp.w   R4, 0x0000
+     99    00009E 0424                     jeq     firstRow
+    100    0000A0 80945FFF                 cmp.w   R4, 0x0001
+    101    0000A4 0524                     jeq     secondRow
+    102    0000A6 073C                     jmp     LeaveSub
+    103    0000A8                          
+    104    0000A8              firstRow:
+    105    0000A8 75508000                 add.b   #0x80, R5
+    106    0000AC 4845                     mov.b   R5, R8
+    107    0000AE 033C                     jmp     LeaveSub
+    108    0000B0                          
+    109    0000B0              secondRow:
+    110    0000B0                          
+    111    0000B0 7550C000                 add.b   #0xC0, R5
+    112    0000B4 4845                     mov.b   R5, R8
+    113    0000B6                          
+    114    0000B6              LeaveSub:
+    115    0000B6 4743                    mov.b    #0x0000, R7
+    116    0000B8 B012....                call #CREATEMESSAGE
+    117    0000BC                         
+    118    0000BC D293....             cmp.b #01, &b_invalid_msg
+    119    0000C0 E027                 jeq Error  
+    120    0000C2                         
+    121    0000C2 3041                    ret
+    122    0000C4              Error2:
+    123    0000C4              
+    124    0000C4 0343               nop
+    125    0000C6                    
+    126    0000C6                    
+    127    0000C6 3041               ret   
+    128    0000C8                    
+    129    0000C8                    
+    130    0000C8              
+    131    0000C8              END
+##############################
+#          CRC:292D          #
+#        Errors:   0         #
+#        Warnings: 0         #
+#         Bytes: 200         #
+##############################
+
+
+
+

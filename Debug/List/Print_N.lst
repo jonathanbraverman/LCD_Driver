@@ -1,0 +1,448 @@
+###############################################################################
+#                                                                             #
+#     IAR Assembler V5.50.1.50465/W32  for MSP430 25/Apr/2013  21:11:02       #
+#     Copyright 1996-2012 IAR Systems AB.                                     #
+#                                                                             #
+#           Target option =  MSP430                                           #
+#           Source file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\Print_N.s43#
+#           List file     =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\Print_N.lst#
+#           Object file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\Print_N.r43#
+#           Command line  =  C:\Users\157_13\Pictures\Module Construction\multiple module\Print_N.s43 #
+#                            -OC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\ #
+#                            -s+ -M<> -w+                                     #
+#                            -LC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\ #
+#                            -cE -t8 -r -D__MSP430G2553__                     #
+#                            -IC:\Program Files (x86)\IAR Systems\Embedded Workbench 6.4 Kickstart\430\INC\ #
+#                                                                             #
+###############################################################################
+
+      1    000286                      NAME    Print_N                  ;
+                                module name
+      2    000286               
+      3    000000                      PUBLIC  Print_Numbers                  
+  ; make the main label visible outside this file
+      4    000286                
+      5    000001              _byte      EQU 1
+      6    000286              
+      7    000286              ORG    0x0286
+      8    000286                      
+      9    000286              b_hundreds DS _byte
+     10    000287              b_tens     DS _byte
+     11    000288              b_ones     DS _byte
+     12    000289              b_zero_t   DS _byte
+     13    00028A              b_zero_o   DS _byte
+     14    00028B                    
+     15    00028B                                                     
+                                
+     16    00028B                                                     
+                                
+     17    00028B                                                     
+                                
+     18    000000                      RSEG    CODE                    ; place
+  program code in 'CODE' segment
+     19    000000              ;-----------------------------------------------
+                               ---------------------------------------
+     20    000000              Print_Numbers
+     21    000000              ;-----------------------------------------------
+                               ---------------------------------------
+     22    000000              
+     23    000000              ;-----------------------------------------------
+                               ---------------------------------------
+     24    000000              test_hundreds
+     25    000000              ;-----------------------------------------------
+                               ---------------------------------------
+     26    000000              
+     27    000000 7690C800             cmp.b           #0xC8, R6              
+  ; Test R6 against 200 to see if a 2 goes into the hundreds.
+     28    000004 3A2C                 jhs             two_hundred            
+  ; Two goes into the hundreds space.
+     29    000006 76906400             cmp.b           #0x64, R6              
+  ; Test R6 against 100 to see if a 1 goes into the hundreds.
+     30    00000A 3F2C                 jhs             one_hundred            
+  ; One goes into the hundreds space.
+     31    00000C F24020008602         mov.b           #0x20, &b_hundreds     
+  ; Move a space into the hundreds place.
+     32    000012              
+     33    000012              ;-----------------------------------------------
+                               ---------------------------------------
+     34    000012              test_tens
+     35    000012              ;-----------------------------------------------
+                               ---------------------------------------
+     36    000012              
+     37    000012 76905A00             cmp.b           #0x5A, R6              
+  ; Test R6 against 90 to see if a 9 goes into the tens.
+     38    000016 412C                 jhs             ninety                 
+  ; Nine goes into the tens space.
+     39    000018 76905000             cmp.b           #0x50, R6              
+  ; Test R6 against 80 to see if an 8 goes into the tens.
+     40    00001C 462C                 jhs             eighty                 
+  ; Eight goes into the tens space.
+     41    00001E 76904600             cmp.b           #0x46, R6              
+  ; Test R6 against 70 to see if a 7 goes into the tens.
+     42    000022 4B2C                 jhs             seventy                
+  ; Seven goes into the tens space.
+     43    000024 76903C00             cmp.b           #0x3C, R6              
+  ; Test R6 against 60 to see if a 6 goes into the tens.
+     44    000028 502C                 jhs             sixty                  
+  ; Six goes into the tens space.
+     45    00002A 76903200             cmp.b           #0x32, R6              
+  ; Test R6 against 50 to see if a 5 goes into the tens.
+     46    00002E 552C                 jhs             fifty                  
+  ; Five goes into the tens space.
+     47    000030 76902800             cmp.b           #0x28, R6              
+  ; Test R6 against 40 to see if a 4 goes into the tens.
+     48    000034 5A2C                 jhs             forty                  
+  ; Four goes into the tens space.
+     49    000036 76901E00             cmp.b           #0x1E, R6              
+  ; Test R6 against 30 to see if a 3 goes into the tens.
+     50    00003A 5F2C                 jhs             thirty                 
+  ; Three goes into the tens space.
+     51    00003C 76901400             cmp.b           #0x14, R6              
+  ; Test R6 against 20 to see if a 2 goes into the tens.
+     52    000040 642C                 jhs             twenty                 
+  ; Two goes into the tens space.
+     53    000042 76900A00             cmp.b           #0x0A, R6              
+  ; Test R6 against 10 to see if a 1 goes into the tens.
+     54    000046 692C                 jhs             ten                    
+  ; One goes into the tens space.
+     55    000048 703C                 jmp             zero_tens              
+  ; Put a zero into that area.
+     56    00004A              
+     57    00004A              ;-----------------------------------------------
+                               ---------------------------------------
+     58    00004A              test_ones
+     59    00004A              ;-----------------------------------------------
+                               ---------------------------------------
+     60    00004A              
+     61    00004A 76900900             cmp.b           #0x09, R6              
+  ; Test R6 against 9 to see if a 9 goes into the tens.
+     62    00004E 782C                 jhs             nine                   
+  ; Nine goes into the tens space.
+     63    000050 7692                 cmp.b           #0x08, R6              
+  ; Test R6 against 8 to see if an 8 goes into the tens.
+     64    000052 7C2C                 jhs             eight                  
+  ; Eight goes into the tens space.
+     65    000054 76900700             cmp.b           #0x07, R6              
+  ; Test R6 against 7 to see if a 7 goes into the tens.
+     66    000058 7E2C                 jhs             seven                  
+  ; Seven goes into the tens space.
+     67    00005A 76900600             cmp.b           #0x06, R6              
+  ; Test R6 against 6 to see if a 6 goes into the tens.
+     68    00005E 812C                 jhs             six                    
+  ; Six goes into the tens space.
+     69    000060 76900500             cmp.b           #0x05, R6              
+  ; Test R6 against 5 to see if a 5 goes into the tens.
+     70    000064 842C                 jhs             five                   
+  ; Five goes into the tens space.
+     71    000066 6692                 cmp.b           #0x04, R6              
+  ; Test R6 against 4 to see if a 4 goes into the tens.
+     72    000068 882C                 jhs             four                   
+  ; Four goes into the tens space.
+     73    00006A 76900300             cmp.b           #0x03, R6              
+  ; Test R6 against 3 to see if a 3 goes into the tens.
+     74    00006E 8A2C                 jhs             three                  
+  ; Three goes into the tens space.
+     75    000070 6693                 cmp.b           #0x02, R6              
+  ; Test R6 against 2 to see if a 2 goes into the tens.
+     76    000072 8E2C                 jhs             two                    
+  ; Two goes into the tens space.
+     77    000074 5693                 cmp.b           #0x01, R6              
+  ; Test R6 against 1 to see if a 1 goes into the tens.
+     78    000076 912C                 jhs             one                    
+  ; One goes into the tens space.
+     79    000078 953C                 jmp             zero_ones
+     80    00007A              
+     81    00007A              ;-----------------------------------------------
+                               ---------------------------------------
+     82    00007A              ;Subroutines moving the ASCII value of their
+                                respective 
+     83    00007A              ;numbers to the hundreds, tens, and ones
+                                places.
+     84    00007A              ;-----------------------------------------------
+                               ---------------------------------------
+     85    00007A              
+     86    00007A              two_hundred
+     87    00007A              
+     88    00007A F24032008602         mov.b           #0x32, &b_hundreds     
+  ; Move a 2 into the hundreds place.
+     89    000080 7680C800             sub.b           #0xC8, R6              
+  ; Subtract 200 from R6.
+     90    000084 D2438902             mov.b           #0x01, &b_zero_t       
+  ; Dirty bit for Tens place to determine whether a blank or zero is necessary.
+     91    000088 C43F                 jmp             test_tens              
+  ; Find Tens value.
+     92    00008A              
+     93    00008A              one_hundred
+     94    00008A              
+     95    00008A F24031008602         mov.b           #0x31, &b_hundreds     
+  ; Move a 1 into the hundreds place.
+     96    000090 76806400             sub.b           #0x64, R6              
+  ; Subtract 100 from R6.
+     97    000094 D2438902             mov.b           #0x01, &b_zero_t       
+  ; Dirty bit for Tens place to determine whether a blank or zero is necessary.
+     98    000098 BC3F                 jmp             test_tens              
+  ; Find Tens value.
+     99    00009A              
+    100    00009A              ;-----------------------------------------------
+                               ---------------------------------------
+    101    00009A              ;Tens Place
+    102    00009A              ;-----------------------------------------------
+                               ---------------------------------------
+    103    00009A              
+    104    00009A              ninety
+    105    00009A              
+    106    00009A F24039008702         mov.b           #0x39, &b_tens         
+  ; Move a 9 into the tens place.
+    107    0000A0 76805A00             sub.b           #0x5A, R6              
+  ; Subract 90 from R6.
+    108    0000A4 D2438A02             mov.b           #0x01, &b_zero_o       
+  ; Dirty bit for Ones place to determine whether a blank or zero is necessary.
+    109    0000A8 D03F                 jmp             test_ones
+    110    0000AA              
+    111    0000AA              eighty
+    112    0000AA              
+    113    0000AA F24038008702         mov.b           #0x38, &b_tens         
+  ; Move a 8 into the tens place.
+    114    0000B0 76805000             sub.b           #0x50, R6              
+  ; Subtract 80 from R6.
+    115    0000B4 D2438A02             mov.b           #0x01, &b_zero_o       
+  ; Dirty bit for Ones place to determine whether a blank or zero is necessary.
+    116    0000B8 C83F                 jmp             test_ones
+    117    0000BA              
+    118    0000BA              seventy
+    119    0000BA              
+    120    0000BA F24037008702         mov.b           #0x37, &b_tens         
+  ; Move a 7 into the tens place.
+    121    0000C0 76804600             sub.b           #0x46, R6              
+  ; Subtract 70 from R6.
+    122    0000C4 D2438A02             mov.b           #0x01, &b_zero_o       
+  ; Dirty bit for Ones place to determine whether a blank or zero is necessary.
+    123    0000C8 C03F                 jmp             test_ones
+    124    0000CA              
+    125    0000CA              sixty
+    126    0000CA              
+    127    0000CA F24036008702         mov.b           #0x36, &b_tens         
+  ; Move a 6 into the tens place.
+    128    0000D0 76803C00             sub.b           #0x3C, R6              
+  ; Subtract 60 from R6.
+    129    0000D4 D2438A02             mov.b           #0x01, &b_zero_o       
+  ; Dirty bit for Ones place to determine whether a blank or zero is necessary.
+    130    0000D8 B83F                 jmp             test_ones
+    131    0000DA              
+    132    0000DA              fifty
+    133    0000DA              
+    134    0000DA F24035008702         mov.b           #0x35, &b_tens         
+  ; Move a 5 into the tens place.
+    135    0000E0 76803200             sub.b           #0x32, R6              
+  ; Subtract 50 from R6.
+    136    0000E4 D2438A02             mov.b           #0x01, &b_zero_o       
+  ; Dirty bit for Ones place to determine whether a blank or zero is necessary.
+    137    0000E8 B03F                 jmp             test_ones
+    138    0000EA              
+    139    0000EA              forty
+    140    0000EA              
+    141    0000EA F24034008702         mov.b           #0x34, &b_tens         
+  ; Move a 4 into the tens place.
+    142    0000F0 76802800             sub.b           #0x28, R6              
+  ; Subtract 40 from R6.
+    143    0000F4 D2438A02             mov.b           #0x01, &b_zero_o       
+  ;Dirty bit for Ones place to determine whether a blank or zero is necessary.
+    144    0000F8 A83F                 jmp             test_ones
+    145    0000FA              
+    146    0000FA              thirty
+    147    0000FA              
+    148    0000FA F24033008702         mov.b           #0x33, &b_tens         
+  ; Move a 3 into the tens place.
+    149    000100 76801E00             sub.b           #0x1E, R6              
+  ; Subtract 30 from R6.
+    150    000104 D2438A02             mov.b           #0x01, &b_zero_o       
+  ; Dirty bit for Ones place to determine whether a blank or zero is necessary.
+    151    000108 A03F                 jmp             test_ones
+    152    00010A              
+    153    00010A              twenty
+    154    00010A              
+    155    00010A F24032008702         mov.b           #0x32, &b_tens         
+  ; Move a 2 into the tens place.
+    156    000110 76801400             sub.b           #0x14, R6              
+  ; Subtract 20 from R6.
+    157    000114 D2438A02             mov.b           #0x01, &b_zero_o       
+  ; Dirty bit for Ones place to determine whether a blank or zero is necessary.
+    158    000118 983F                 jmp             test_ones
+    159    00011A              
+    160    00011A              ten
+    161    00011A              
+    162    00011A F24031008702         mov.b           #0x31, &b_tens         
+  ; Move a 1 into the tens place.
+    163    000120 76800A00             sub.b           #0x0A, R6              
+  ; Subtract 10 from R6.
+    164    000124 D2438A02             mov.b           #0x01, &b_zero_o       
+  ; Dirty bit for Ones place to determine whether a blank or zero is necessary.
+    165    000128 903F                 jmp             test_ones
+    166    00012A              
+    167    00012A              zero_tens
+    168    00012A D2938902             cmp.b           #0x01, &b_zero_t       
+  ; Is there a value in the hundreds place?
+    169    00012E 0420                 jne             zero_tens_space        
+  ; No, leave it blank.
+    170    000130 F24030008702         mov.b           #0x30, &b_tens         
+  ; Move a zero into the tens place.
+    171    000136 893F                 jmp             test_ones
+    172    000138                      
+    173    000138              zero_tens_space
+    174    000138              
+    175    000138 F24020008702         mov.b           #0x20, &b_tens         
+  ; Put a space in the tens spot.
+    176    00013E 853F                 jmp             test_ones              
+  
+    177    000140              
+    178    000140              ;-----------------------------------------------
+                               ----------------------------------
+    179    000140              ;Ones Place
+    180    000140              ;-----------------------------------------------
+                               ----------------------------------
+    181    000140              
+    182    000140              nine
+    183    000140              
+    184    000140 F24039008802         mov.b           #0x39, &b_ones         
+  ; Move a 9 into the tens place.
+    185    000146 76800900             sub.b           #0x09, R6              
+  ; Subtract 9 from R6
+    186    00014A 3B3C                 jmp             add_comp
+    187    00014C              
+    188    00014C              eight
+    189    00014C              
+    190    00014C F24038008802         mov.b           #0x38, &b_ones         
+  ; Move a 8 into the tens place.
+    191    000152 7682                 sub.b           #0x08, R6              
+  ; Subtract 8 from R6
+    192    000154 363C                 jmp             add_comp
+    193    000156              
+    194    000156              seven
+    195    000156              
+    196    000156 F24037008802         mov.b           #0x37, &b_ones         
+  ; Move a 7 into the tens place.
+    197    00015C 76800700             sub.b           #0x07, R6              
+  ; Subtract 7 from R6
+    198    000160 303C                 jmp             add_comp
+    199    000162              
+    200    000162              six
+    201    000162              
+    202    000162 F24036008802         mov.b           #0x36, &b_ones         
+  ; Move a 6 into the tens place.
+    203    000168 76800600             sub.b           #0x06, R6              
+  ; Subtract 6 from R6
+    204    00016C 2A3C                 jmp             add_comp
+    205    00016E              
+    206    00016E              five
+    207    00016E              
+    208    00016E F24035008802         mov.b           #0x35, &b_ones         
+  ; Move a 5 into the tens place.
+    209    000174 76800500             sub.b           #0x05, R6              
+  ; Subtract 5 from R6
+    210    000178 243C                 jmp             add_comp
+    211    00017A              
+    212    00017A              four
+    213    00017A              
+    214    00017A F24034008802         mov.b           #0x34, &b_ones         
+  ; Move a 4 into the tens place.
+    215    000180 6682                 sub.b           #0x04, R6              
+  ; Subtract 4 from R6
+    216    000182 1F3C                 jmp             add_comp
+    217    000184              
+    218    000184              three
+    219    000184              
+    220    000184 F24033008802         mov.b           #0x33, &b_ones         
+  ; Move a 3 into the tens place.
+    221    00018A 76800300             sub.b           #0x03, R6              
+  ; Subtract 3 from R6
+    222    00018E 193C                 jmp             add_comp
+    223    000190              
+    224    000190              two
+    225    000190              
+    226    000190 F24032008802         mov.b           #0x32, &b_ones         
+  ; Move a 2 into the tens place.
+    227    000196 6683                 sub.b           #0x02, R6              
+  ; Subtract 2 from R6
+    228    000198 143C                 jmp             add_comp
+    229    00019A              
+    230    00019A              one
+    231    00019A              
+    232    00019A F24031008802         mov.b           #0x31, &b_ones         
+  ; Move a 1 into the tens place.
+    233    0001A0 5683                 sub.b           #0x01, R6              
+  ; Subtract 1 from R6
+    234    0001A2 0F3C                 jmp             add_comp
+    235    0001A4              
+    236    0001A4              zero_ones
+    237    0001A4              
+    238    0001A4 F24030008802         mov.b           #0x30, &b_ones         
+  ; Move a 0 into the tens place.
+    239    0001AA 0B3C                 jmp             add_comp
+    240    0001AC                      
+    241    0001AC              ;-----------------------------------------------
+                               -------------------------------
+    242    0001AC              ;Subroutines for Matt's CREATEMESSAGE code.
+    243    0001AC              ;-----------------------------------------------
+                               -------------------------------
+    244    0001AC              
+    245    0001AC              print_hundreds
+    246    0001AC                      
+    247    0001AC 5743                 mov.b   #0x01, R7                      
+  ; sets as data call.
+    248    0001AE 58528602             add.b   &b_hundreds, R8                
+                                                             ; Move that value
+                                                             into R8.
+    249    0001B2                 ;     cmp.b   #0x01, &b_invalid_msg          
+                                ; Error Check.
+    250    0001B2                  ;    jeq     Error                          
+                                ; Error. Jump to Error.
+    251    0001B2                      ;call   #CREATEMESSAGE                 
+                                ; Call Create Message Subroutine
+    252    0001B2 073C                 jmp     add_comp                       
+  
+    253    0001B4              
+    254    0001B4              print_tens
+    255    0001B4              
+    256    0001B4 5743                 mov.b   #0x01, R7                      
+  ; sets as data.
+    257    0001B6 58528702             add.b   &b_tens, R8                    
+                                                         ; Dirty bit set. Move
+                                                         tens into R8.
+    258    0001BA                 ;     cmp.b   #0x01, &b_invalid_msg          
+                                ; Error Check.
+    259    0001BA                ;      jeq     Error                          
+                                ; Error. Jump to Error.
+    260    0001BA                      ;call   #CREATEMESSAGE                 
+                                ; Call Create Message Subroutine.
+    261    0001BA 033C                 jmp     add_comp
+    262    0001BC              
+    263    0001BC              print_ones
+    264    0001BC              
+    265    0001BC 5743                 mov.b   #0x01, R7                      
+  ; sets as data.
+    266    0001BE 58528802             add.b   &b_ones, R8                    
+                                                         ; move whatever the
+                                                         ones value is (0 or
+                                                         otherwise) into
+                                                         R8.
+    267    0001C2                 ;     cmp.b   #0x01, &b_invalid_msg          
+                                ; Error Check.
+    268    0001C2               ;       jeq     Error                          
+                                ; Error. Jump to Error.
+    269    0001C2                      ;call   #CREATEMESSAGE                 
+                                ; Call Create Message Subroutine.
+    270    0001C2              
+    271    0001C2              add_comp
+    272    0001C2                      
+    273    0001C2 3041                 ret
+    274    0001C4              END
+##############################
+#          CRC:BE93          #
+#        Errors:   0         #
+#        Warnings: 0         #
+#         Bytes: 452         #
+##############################
+
+
+
+

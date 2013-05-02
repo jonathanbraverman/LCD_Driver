@@ -1,0 +1,143 @@
+###############################################################################
+#                                                                             #
+#     IAR Assembler V5.50.1.50465/W32  for MSP430 25/Apr/2013  21:11:02       #
+#     Copyright 1996-2012 IAR Systems AB.                                     #
+#                                                                             #
+#           Target option =  MSP430                                           #
+#           Source file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\CREATEMESSAGE-Zdeb.s43#
+#           List file     =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\CREATEMESSAGE-Zdeb.lst#
+#           Object file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\CREATEMESSAGE-Zdeb.r43#
+#           Command line  =  C:\Users\157_13\Pictures\Module Construction\multiple module\CREATEMESSAGE-Zdeb.s43 #
+#                            -OC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\ #
+#                            -s+ -M<> -w+                                     #
+#                            -LC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\ #
+#                            -cE -t8 -r -D__MSP430G2553__                     #
+#                            -IC:\Program Files (x86)\IAR Systems\Embedded Workbench 6.4 Kickstart\430\INC\ #
+#                                                                             #
+###############################################################################
+
+      1    00028B              #include "msp430.h"                     ;
+                                #define controlled include file
+      2    00028B              
+      3    00028B              ;-----------------------------------------------
+                               --------------------------------
+      4    00028B              ; Program Defines
+      5    00028B              ;-----------------------------------------------
+                               --------------------------------
+      6    000001              _byte           EQU 1                           
+                                                               ; Size of a byte
+                                is one RAM unit
+      7    00028B              
+      8    00028B              ;-----------------------------------------------
+                               --------------------------------
+      9    00028B                          ORG     028Bh                       
+                                 ; Global Variable (RAM) Definitions
+     10    00028B              ;-----------------------------------------------
+                               --------------------------------
+     11    00028B              b_invalid_msg   DS _byte                        
+                                 ; Status of the CREATEMESSAGE
+     12    00028C              
+     13    00028C              
+     14    00028C                      NAME    CREATEMESSAGE                   
+                                                               ; module
+                                name
+     15    000000                      EXTERN  WRITEBUF                        
+                                 ; declare an externally (other file) defined
+  subroutine
+     16    000000                      EXTERN  b_write_status_flag             
+                                 ; declare an externally (other file) defined
+  variable
+     17    00028C              
+     18    000000                      PUBLIC  b_invalid_msg                   
+                                 ; make the b_invalid_msg label visible outside
+  this file
+     19    000000                      PUBLIC  CREATEMESSAGE                   
+                                 ; make the main label visible outside this
+  file
+     20    00028C              
+     21    000000                      RSEG    CODE                            
+                                 ; place program code in 'CODE' segment
+     22    000000              
+     23    000000              
+     24    000000              ;-----------------------------------------------
+                               --------------------------------; Prepare and
+                                place message into Ring Buffer
+     25    000000              CREATEMESSAGE                                   
+                                                               ; IN: R7, R8,
+                                b_write_status_flag
+     26    000000              ;-----------------------------------------------
+                               --------------------------------; OUT:
+                                b_invalid_msg
+     27    000000              error_checkR7
+     28    000000 4793                 cmp.b   #0, R7                          
+                                 ; Is R7 0?
+     29    000002 0324                 jeq     error_checkR8                   
+                                 ; R7 is a valid value
+     30    000004 5793                 cmp.b   #1, R7                          
+                                 ; Is R7 1?
+     31    000006 0124                 jeq     error_checkR8                   
+                                 ; R7 is a valid value
+     32    000008 1520                 jne     invalid_value                   
+                                 ; Invalid value, report error
+     33    00000A              
+     34    00000A              error_checkR8
+     35    00000A 38900001             cmp.w   #256, R8                        
+                                 ; Is data in R8 not a byte?
+     36    00000E 122C                 jhs     invalid_value                   
+                                 ; Yes, corrupt message, report error
+     37    000010 003C                 jmp     write_msg                       
+                                 ; Valid message, begin placing it in the
+  buffer
+     38    000012              
+     39    000012              write_msg
+     40    000012 D293....             cmp.b   #1, &b_write_status_flag        
+                                 ; Is the buffer full?
+     41    000016 FD27                 jeq     write_msg                       
+                                 ; Yes, check the buffer status again
+     42    000018 8810                 SWPB    R8                              
+                                 ; Move value of message in R8 to the upper
+  byte
+     43    00001A 0758                 add.w   R8, R7                          
+                                                                               
+                                                       ; Add the actual message
+                                                    to the message type
+     44    00001C              check_buf
+     45    00001C B012....             call    #WRITEBUF                       
+                                 ; Store the message in the Ring Buffer
+     46    000020 D293....             cmp.b   #1, &b_write_status_flag        
+                                 ; Is the buffer full?
+     47    000024 FB27                 jeq     check_buf                       
+                                 ; Yes, check the buffer status again
+     48    000026 0788                 sub.w   R8, R7                          
+                                                                               
+                                                       ; Restore original
+                                                    R8/message value
+     49    000028 8810                 SWPB    R8                              
+                                 ; Restore original R7/message type value
+     50    00002A F2D20100             bis.b   #UCB0TXIE, &IE2                 
+                                 ; Enable the USCIB0_TX_ISR
+     51    00002E D2C38B02             bic.b   #1, &b_invalid_msg              
+                                 ; Alert higher process that message was written
+  to the buffer
+     52    000032 033C                 jmp     end_of_create
+     53    000034              
+     54    000034              invalid_value
+     55    000034 D2D38B02             bis.b   #1, &b_invalid_msg              
+                                 ; Alert higher process that message was not
+  written to the buffer
+     56    000038 003C                 jmp     end_of_create
+     57    00003A              
+     58    00003A              end_of_create
+     59    00003A 3041                 ret
+     60    00003C                          
+     61    00003C              END
+##############################
+#          CRC:171D          #
+#        Errors:   0         #
+#        Warnings: 0         #
+#         Bytes: 60          #
+##############################
+
+
+
+

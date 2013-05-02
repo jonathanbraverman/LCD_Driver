@@ -1,0 +1,131 @@
+#include "msp430.h"                     ; #define controlled include file
+
+        NAME    LCDCONTROL               ; module name
+        EXTERN  CREATEMESSAGE            ; declare an externally (other file) defined subroutine
+        EXTERN  b_invalid_msg           ; declare an externally (other file) defined variable
+        
+        PUBLIC  InitializeLCD               ; make the main label visible outside this module
+        PUBLIC  Clear
+        PUBLIC  SetAddress
+        RSEG    CODE                    ; place program in 'CODE' segment
+;-------------------------------------------------------------------------------
+InitializeLCD:
+;-------------------------------------------------------------------------------
+
+        mov.b #0, R7                    ;0 to R7 = Control Message being sent
+;Initializing by Instruction
+        mov.b #0x30, R8                 ;Function Set (0 0 1 DL N DH 0 IS)
+        Call #CREATEMESSAGE
+        cmp.b #01, &b_invalid_msg
+        jeq Error
+        
+        mov.b #0x30, R8                 ;DL = Select 8 bit or 4 bit bus mode (1 = 8 bit)
+        Call #CREATEMESSAGE
+        cmp.b #01, &b_invalid_msg
+        jeq Error 
+        
+        mov.b #0x30, R8                 ;N = "High", 2 line display mode. "Low", 1 line display mode
+        Call #CREATEMESSAGE
+        cmp.b #01, &b_invalid_msg
+        jeq Error
+        
+        mov.b #0x39, R8                 ;DH = Double Height Font, "High" is double height "Low" is normal
+                                        ;IS = Normal or Extension instruction select
+        Call #CREATEMESSAGE
+        cmp.b #01, &b_invalid_msg
+        jeq Error
+        
+        
+        mov.b #0x14, R8                 ;Internal OSC Frequency
+        Call #CREATEMESSAGE
+        cmp.b #01, &b_invalid_msg
+        jeq Error
+      
+        mov.b #0x56, R8           ;Power Control
+        Call #CREATEMESSAGE  
+        cmp.b #01, &b_invalid_msg
+        jeq Error
+        
+        mov.b #0x6D, R8           ;Follower Control
+        Call #CREATEMESSAGE
+        cmp.b #01, &b_invalid_msg
+        jeq Error
+       
+        mov.b #0x70, R8           ;Contrast Set
+        Call #CREATEMESSAGE
+        cmp.b #01, &b_invalid_msg
+        jeq Error
+        
+        mov.b #0x0C, R8           ;Display ON/OFF Control
+        Call #CREATEMESSAGE 
+        cmp.b #01, &b_invalid_msg
+        jeq Error
+ 
+        ret
+
+Error:
+
+      nop
+      
+      
+      ret
+      
+;-------------------------------------------------------------------------------
+Clear:
+;-------------------------------------------------------------------------------
+
+            mov.b #0, R7             ;0 to R7 = Control Message being sent
+            mov.w   #0x0001, R8      ; sends the clear message
+            
+            call    #CREATEMESSAGE
+        cmp.b #01, &b_invalid_msg
+        jeq Error
+            
+            ret
+            
+            
+  Error1:
+
+      nop
+      
+      
+      ret
+          
+;-------------------------------------------------------------------------------
+SetAddress: ; Sets the cursor to the right location
+;-------------------------------------------------------------------------------
+
+            cmp.w   R4, 0x0000
+            jeq     firstRow
+            cmp.w   R4, 0x0001
+            jeq     secondRow
+            jmp     LeaveSub
+            
+firstRow:
+            add.b   #0x80, R5
+            mov.b   R5, R8
+            jmp     LeaveSub
+            
+secondRow:
+            
+            add.b   #0xC0, R5
+            mov.b   R5, R8
+            
+LeaveSub:
+           mov.b    #0x0000, R7
+           call #CREATEMESSAGE
+           
+        cmp.b #01, &b_invalid_msg
+        jeq Error  
+           
+           ret
+Error2:
+
+      nop
+      
+      
+      ret   
+      
+      
+
+END

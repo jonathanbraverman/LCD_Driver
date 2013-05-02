@@ -1,0 +1,343 @@
+###############################################################################
+#                                                                             #
+#     IAR Assembler V5.50.1.50465/W32  for MSP430 30/Apr/2013  20:14:03       #
+#     Copyright 1996-2012 IAR Systems AB.                                     #
+#                                                                             #
+#           Target option =  MSP430                                           #
+#           Source file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\Ring_buffer.s43#
+#           List file     =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\Ring_buffer.lst#
+#           Object file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\Ring_buffer.r43#
+#           Command line  =  C:\Users\157_13\Pictures\Module Construction\multiple module\Ring_buffer.s43 #
+#                            -OC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\ #
+#                            -s+ -M<> -w+                                     #
+#                            -LC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\ #
+#                            -cE -t8 -r -D__MSP430G2553__                     #
+#                            -IC:\Program Files (x86)\IAR Systems\Embedded Workbench 6.4 Kickstart\430\INC\ #
+#                                                                             #
+###############################################################################
+
+      1    000200                          NAME        Ring_buffer             
+                                  ; module name
+      2    000200              
+      3    000000                          PUBLIC      b_write_status_flag     
+    ; make the variable labels visible outside this file
+      4    000000                          PUBLIC      b_read_status_flag
+      5    000000                          PUBLIC      b_message_type
+      6    000000                          PUBLIC      b_message_data
+      7    000000                          PUBLIC      INITBUFVARS             
+    ; Make subroutine labels visible outside of this file
+      8    000000                          PUBLIC      WRITEBUF                
+    
+      9    000000                          PUBLIC      READBUF 
+     10    000200                                
+     11    000001              _byte        EQU 1                              
+                                  ; Size of a byte is one RAM unit
+     12    000002              _word        EQU 2                              
+                                  ; Size of a word is two RAM units
+     13    000200              
+     14    000200                         ORG          0x0200                  
+    ; Declare variables at the start of RAM
+     15    000200              
+     16    000200              b_ring_buffer           DS  (_byte * 128)       
+                                                                ; 8-bit 128
+                                                              element array
+                                                              used as circular
+                                                              buffer 
+                                                              
+     17    000280              b_write_ptr             DS  _byte               
+    ; 1 byte element used as the write pointer
+     18    000281              b_read_ptr              DS  _byte               
+    ; 1 byte element used as the read pointer
+     19    000282              b_write_status_flag     DS  _byte               
+    ; 1 byte element used as a write sub status flag for buffer full
+     20    000283              b_read_status_flag      DS  _byte               
+    ; 1 byte element used as a read sub status flag for buffer full
+     21    000284              b_message_type          DS  _byte               
+    ; 1 byte element to store and pass message type as control or display
+  data
+     22    000285              b_message_data          DS  _byte               
+    ; 1 byte element to store and pass the actual data to send
+     23    000286                            
+     24    000286                                                     
+                                
+     25    000000                          RSEG        CODE                    
+    ; Place program code in 'CODE' segment
+     26    000000              
+     27    000000              ;-----------------------------------------------
+                               --------------------------------; Purpose of
+                                Function – Initialize ring buffer subroutine
+                                variables
+     28    000000              INITBUFVARS                                     
+                                                               ; IN: None      
+                                       
+     29    000000              ;-----------------------------------------------
+                               --------------------------------; OUT:
+                                None
+     30    000000              
+     31    000000 C2438002                 mov.b    #00h, &b_write_ptr         
+    ; Initialize Write pointer to 0
+     32    000004 C2438102                 mov.b    #00h, &b_read_ptr          
+    ; Initialize Read pointer to 0
+     33    000008 C2438202                 mov.b    #00h, &b_write_status_flag 
+    ; Initialize the Write status flag to 0
+     34    00000C C2438302                 mov.b    #00h, &b_read_status_flag  
+    ; Initialize the Read status flag to 0
+     35    000010 0343                     NOP
+     36    000012 3041                     RET
+     37    000014              
+     38    000014              ;-----------------------------------------------
+                               --------------------------------; Purpose of
+                                Function – Write a word to the buffer
+     39    000014              WRITEBUF:                                       
+                                                              ; IN: R7
+                                (Message)
+     40    000014              ;-----------------------------------------------
+                               --------------------------------; OUT:
+                                b_write_status_flag
+     41    000014              
+     42    000014 0B12                     PUSH     R11                        
+    ; Protect contents of R11
+     43    000016 0C12                     PUSH     R12                        
+    ; Protect contents of R12
+     44    000018 0D12                     PUSH     R13                        
+    ; Protect contents of R13
+     45    00001A 0E12                     PUSH     R14                        
+    ; Protect contents of R14
+     46    00001C 5C428002                 mov.b    &b_write_ptr, R12          
+                                                                     ; Move
+                                                                   contents of
+                                                                   Write
+                                                                   pointer to
+                                                                   R12 for
+                                                                   comparison
+     47    000020 5E428002                 mov.b    &b_write_ptr, R14          
+                                                                     ; Move
+                                                                   contents of
+                                                                   Write
+                                                                   pointer to
+                                                                   R14 for
+                                                                   comparison  
+                                                                        
+                                                                   
+     48    000024 5D428102                 mov.b    &b_read_ptr, R13           
+                                                                    ; Move
+                                                                  contents of
+                                                                  the Read
+                                                                  pointer to
+                                                                  R13 for
+                                                                  comparison
+     49    000028 0C8D                     sub.w    R13, R12                   
+                                                            ; Write pointer -
+                                                          Read pointer =>
+                                                          R12
+     50    00002A 3C907E00                 cmp.w    #126, R12                  
+    ; Test if Write pointer - Read pointer = 126
+     51    00002E 1124                     JZ       Buffer_full                
+    ; The buffer is full if Write pointer is at an offset of 126 and the Read
+  pointer is at 0
+     52    000030 0D8E                     sub.w    R14, R13                   
+                                                            ; Read pointer -
+                                                          Write pointer =>
+                                                          R13
+     53    000032 2D93                     cmp.w    #2, R13                    
+    ; Test if Read pointer - Write pointer = 2
+     54    000034 0E24                     JZ       Buffer_full                
+    ; The buffer is full if the Read pointer is 2 greater than the Write
+  pointer
+     55    000036 003C                     JMP      Write_ready                
+    ; The buffer is ready to to accept data if it is not full 
+     56    000038                          
+     57    000038              Write_ready:
+     58    000038 C2438202                 mov.b    #00h, &b_write_status_flag 
+    ; clear flag if the buffer is ready
+     59    00003C 5B428002                 mov.b    &b_write_ptr, R11          
+                                                                     ; Move
+                                                                   Write
+                                                                   pointer to
+                                                                   R11 to be
+                                                                   used for
+                                                                   writing to
+                                                                   the
+                                                                   buffer
+     60    000040 8B470002                 mov.w    R7, 0x200(R11)             
+                                                           ; Write data to the
+                                                         buffer at the location
+                                                         of 0x200(Write
+                                                         pointer)
+     61    000044 E2538002                 add.b    #2, &b_write_ptr           
+    ; Increment the Write pointer by 2 to point to the next word location of the
+  buffer
+     62    000048 F2B080008002             bit.b    #0x80, &b_write_ptr        
+    ; Test is the Write pointer is out of bounds
+     63    00004E 042C                     JC       Fix_Write_ptr              
+    ; Jump to reset the Write pointer back to zero
+     64    000050 063C                     JMP      Write_end           
+                                                                          
+     65    000052                          
+     66    000052              Buffer_full:
+     67    000052 D2438202                 mov.b    #01h, &b_write_status_flag 
+    ; Set a flag if the buffer is full
+     68    000056 033C                     JMP      Write_end  
+     69    000058                          
+     70    000058              Fix_Write_ptr:
+     71    000058 C2438002                 mov.b    #0, &b_write_ptr           
+    ; Reset the Write pointer to 0 since it has reached the upper limit of the
+  buffer
+     72    00005C 003C                     JMP      Write_end  
+     73    00005E                          
+     74    00005E              Write_end:
+     75    00005E 3E41                     POP      R14
+     76    000060 3D41                     POP      R13
+     77    000062 3C41                     POP      R12
+     78    000064 3B41                     POP      R11
+     79    000066 3041                     RET         
+     80    000068              
+     81    000068              ;-----------------------------------------------
+                               --------------------------------; Purpose of
+                                Function – Read a word from the buffer
+     82    000068               READBUF:                                       
+                                                               ; IN: None
+     83    000068              ;-----------------------------------------------
+                               --------------------------------; OUT:
+                                b_read_status_flag, b_message_type, b_message_d
+                               ata
+     84    000068              
+     85    000068 0A12                     PUSH     R10                        
+    ; Protect contents of R10
+     86    00006A 0B12                     PUSH     R11                        
+    ; Protect contents of R11
+     87    00006C 0D12                     PUSH     R13                        
+    ; Protect contents of R13
+     88    00006E 5B428002                 mov.b    &b_write_ptr, R11          
+                                                                     ; Move the
+                                                                   Write
+                                                                   pointer
+                                                                   value to R11
+                                                                   to be used
+                                                                   for
+                                                                   comparison
+     89    000072 5D428102                 mov.b    &b_read_ptr, R13           
+                                                                    ; Move the
+                                                                  Read pointer
+                                                                  value to R13
+                                                                  to be used
+                                                                  for
+                                                                  comparison
+     90    000076 0D8B                     sub.w    R11, R13                   
+                                                            ; Write pointer -
+                                                          Read pointer =>
+                                                          R13
+     91    000078 0D93                     cmp.w    #0, R13                    
+    ; Test if Write pointer - Read pointer = 0
+     92    00007A 1424                     JZ       Buffer_empty               
+    ; The buffer is empty is the Write pointer is equal to the Read pointer
+     93    00007C 003C                     JMP      Read_ready
+     94    00007E                          
+     95    00007E              Read_ready:
+     96    00007E 5A428102                 mov.b    &b_read_ptr, R10           
+                                                                    ; Move Read
+                                                                  pointer to
+                                                                  R10 to be
+                                                                  used for
+                                                                  reading from
+                                                                  the
+                                                                  buffer
+     97    000082 D24A00028402             mov.b    0x200(R10), &b_message_type
+                                                                 ; Move value
+                                                               at location
+                                                               0x200(Read
+                                                               pointer) into
+                                                               b_message_type
+                                                               to be sent over
+                                                               SPI
+     98    000088 D2538102                 inc.b    &b_read_ptr                
+    ; Increment the pointer to point to the next sequential byte
+     99    00008C 5A428102                 mov.b    &b_read_ptr, R10           
+                                                                    ; Move Read
+                                                                  pointer to
+                                                                  R10 to be
+                                                                  used for
+                                                                  reading from
+                                                                  the
+                                                                  buffer
+    100    000090 D24A00028502             mov.b    0x200(R10), &b_message_data
+                                                                 ; Move value
+                                                               at location
+                                                               0x200(Read
+                                                               pointer) into
+                                                               b_message_data
+                                                               to be sent over
+                                                               SPI
+    101    000096 D2538102                 inc.b    &b_read_ptr                
+    ; Increment the Read pointer by 1 to point to the next byte location of the
+  buffer
+    102    00009A F2B080008102             bit.b    #0x80, &b_read_ptr         
+    ; Test if the Read pointer is out of bounds
+    103    0000A0 042C                     JC       Fix_Read_ptr               
+    ; Jump to reset the Read pointer back to zero
+    104    0000A2 063C                     JMP      Test_ptrs                  
+    ; Test if the last message has been read 
+    105    0000A4                          
+    106    0000A4              Buffer_empty:
+    107    0000A4 C2438302                 mov.b    #00h, &b_read_status_flag  
+    ; Set flag to 0 indicating the buffer is empty
+    108    0000A8 103C                     JMP      Read_end
+    109    0000AA                          
+    110    0000AA              Fix_Read_ptr:
+    111    0000AA C2438102                 mov.b    #0, &b_read_ptr            
+    ; Reset the Read pointer to 0 since it has reached the upper limit of the
+  buffer
+    112    0000AE 003C                     JMP      Test_ptrs                  
+    ; Test if the last message has been read 
+    113    0000B0                          
+    114    0000B0              Test_ptrs:
+    115    0000B0 5B428002                 mov.b    &b_write_ptr, R11          
+                                                                     ; Move the
+                                                                   Write
+                                                                   pointer
+                                                                   value to R11
+                                                                   to be used
+                                                                   for
+                                                                   comparison
+    116    0000B4 5D428102                 mov.b    &b_read_ptr, R13           
+                                                                    ; Move the
+                                                                  Read pointer
+                                                                  value to R13
+                                                                  to be used
+                                                                  for
+                                                                  comparison
+    117    0000B8 0D8B                     sub.w    R11, R13                   
+                                                            ; Write pointer -
+                                                          Read pointer =>
+                                                          R13
+    118    0000BA 0D93                     cmp.w    #0, R13                    
+    ; Test is Write pointer - Read_ptr = 0
+    119    0000BC 0320                     JNZ      Still_data                 
+    ; Jump to Still_data if there is data remaining in the buffer
+    120    0000BE D2438302                 mov.b    #01h, &b_read_status_flag  
+    ; Set flag to 1 indicating the last message has just been read out
+    121    0000C2 033C                     JMP      Read_end 
+    122    0000C4                          
+    123    0000C4              Still_data:
+    124    0000C4 E2438302                 mov.b    #02h, &b_read_status_flag  
+    ; Set flag to 2 indicating remaining data in the buffer
+    125    0000C8 003C                     JMP      Read_end
+    126    0000CA                          
+    127    0000CA              Read_end:
+    128    0000CA 3D41                     POP      R13
+    129    0000CC 3B41                     POP      R11
+    130    0000CE 3A41                     POP      R10
+    131    0000D0 3041                     RET
+    132    0000D2              ;-----------------------------------------------
+                               ---------------------------------
+    133    0000D2              END
+##############################
+#          CRC:EC1E          #
+#        Errors:   0         #
+#        Warnings: 0         #
+#         Bytes: 210         #
+##############################
+
+
+
+

@@ -1,0 +1,17 @@
+#include "msp430.h"                     ; #define controlled include file
+        NAME    backlight            ; module name
+
+        PUBLIC  BACKLIGHT_CONTROL       ; make the main label visible outside this file
+  
+        ORG     0x200
+                                  
+        RSEG    CODE                    ; place program code in 'CODE' segment
+;-------------------------------------------------------------------------------; This subroutine controls the brightness of the backlight
+ BACKLIGHT_CONTROL:                                                             ; IN: R10
+;-------------------------------------------------------------------------------; OUT: PWM at P1.6
+
+        MOV	R10, &TA0CCR1	        ; Move the backlight number to TA0CCR1 to modify the duty cycle
+        
+        RET
+
+END

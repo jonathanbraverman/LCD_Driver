@@ -1,0 +1,51 @@
+;*******************************************************************************
+;
+; Module Name: SPI
+; By: Klestan Kaso
+; Date: 2/9/2013
+; Assignment: #7
+;
+;*******************************************************************************
+#include  "msp430g2553.h"
+;-------------------------------------------------------------------------------
+; Program Defines
+;-------------------------------------------------------------------------------
+            ORG     0C000h                  ; Program Reset
+RESET       mov.w   #0280h,SP               ; Initialize stackpointer
+            mov.b   &CALBC1_1MHZ, &BCSCTL1  ; Load calibrated DCO 1MHZ pt 1/2
+            mov.b   &CALDCO_1MHZ, &DCOCTL   ; Load calibrated DCO 1MHZ pt 2/2
+StopWDT     mov.w   #WDTPW+WDTHOLD,&WDTCTL  ; Disable watchdog timer
+         
+SetupSPIMaster
+            bis.b   #UCSWRST, &UCB0CTL1
+            mov.b   #UCSSEL_3 , &UCB0CTL1                                     ; set the clock for the master SMCLK 
+            mov.b   #UCMST + UCMODE_0 + UCSYNC, &UCB0CTL0
+            mov.b   #UCBRF_8, UCB0BR0                                          ; clock divider by 3328
+            bis.b   #BIT7+BIT5, &P1SEL                                                 ; Enable the alternate function 
+            bis.b   #BIT7+BIT5, &P1SEL2
+            bic.b   #UCSWRST, &UCB0CTL1
+            bis.b   #BIT3, &P1REN           ; Enable pullup 
+             
+main        
+            nop            
+            bit.b   #BIT3, &P1IN
+            jc      done
+            bit.b   #UCB0TXIFG, &IFG2
+            jnc     txfull
+            mov.b  #0xA5, &UCB0TXBUF
+txfull         
+            
+done:
+            jmp     main               
+
+        
+
+
+
+
+;-------------------------------------------------------------------------------
+;           Interrupt Vectors
+;-------------------------------------------------------------------------------
+            ORG     0FFFEh                  ; MSP430 RESET Vector
+            DW RESET
+            END

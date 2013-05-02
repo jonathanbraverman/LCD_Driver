@@ -1,0 +1,61 @@
+###############################################################################
+#                                                                             #
+#     IAR Assembler V5.50.1.50465/W32  for MSP430 25/Apr/2013  21:11:02       #
+#     Copyright 1996-2012 IAR Systems AB.                                     #
+#                                                                             #
+#           Target option =  MSP430                                           #
+#           Source file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\SETUPSPI.s43#
+#           List file     =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\SETUPSPI.lst#
+#           Object file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\SETUPSPI.r43#
+#           Command line  =  C:\Users\157_13\Pictures\Module Construction\multiple module\SETUPSPI.s43 #
+#                            -OC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\ #
+#                            -s+ -M<> -w+                                     #
+#                            -LC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\ #
+#                            -cE -t8 -r -D__MSP430G2553__                     #
+#                            -IC:\Program Files (x86)\IAR Systems\Embedded Workbench 6.4 Kickstart\430\INC\ #
+#                                                                             #
+###############################################################################
+
+      1    000000              #include "msp430.h"                     ;
+                                #define controlled include file
+      2    000000              
+      3    000000                          Name SPI            
+      4    000000              
+      5    000000                          
+      6    000000                          PUBLIC SETUPSPI  
+      7    000000                          
+      8    000000                          RSEG CODE
+      9    000000              
+     10    000000              
+     11    000000                       
+     12    000000              SETUPSPI
+     13    000000 D2D36900                 bis.b   #UCSWRST, &UCB0CTL1
+     14    000004 F240C0006900             mov.b   #UCSSEL_3 , &UCB0CTL1       
+                               ; set the clock for the master SMCLK 
+     15    00000A F24009006800             mov.b   #UCMST + UCMODE_0 + UCSYNC,
+  &UCB0CTL0
+     16    000010 F0408000....             mov.b   #UCBRF_8, UCB0BR0           
+                                ; clock divider by 3328
+     17    000016 F2D0A0002600             bis.b   #BIT7+BIT5, &P1SEL          
+                                        ; Enable the alternate function
+  
+     18    00001C F2D0A0004100             bis.b   #BIT7+BIT5, &P1SEL2
+     19    000022 D2C36900                 bic.b   #UCSWRST, &UCB0CTL1
+     20    000026 F2D22700                 bis.b   #BIT3, &P1REN           ;
+  Enable pullup 
+     21    00002A                           
+     22    00002A                     
+     23    00002A              
+     24    00002A 3041                        ret  
+     25    00002C              
+     26    00002C                             END
+##############################
+#          CRC:C0A6          #
+#        Errors:   0         #
+#        Warnings: 0         #
+#         Bytes: 44          #
+##############################
+
+
+
+

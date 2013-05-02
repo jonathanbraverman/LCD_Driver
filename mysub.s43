@@ -1,0 +1,28 @@
+        NAME    mysub                   ; module name
+        EXTERN  LOW1                    ; declare an externally (other file) defined subroutine
+        EXTERN  LOW2                    ; declare an externally (other file) defined subroutine
+
+        PUBLIC  myvar                   ; make the myvar label visible outside this file
+        PUBLIC  MYSUB                   ; make the main label visible outside this file
+  
+        ORG    0x200
+myvar   DB      01        
+                                        
+                                        
+                                        
+        RSEG    CODE                    ; place program code in 'CODE' segment
+;-------------------------------------------------------------------------------; Purpose of Function – what it does
+ MYSUB:                                                                         ; IN: List of inputs (ex. b_memory, BIT3 of w_flag)
+;-------------------------------------------------------------------------------; OUT: List of outputs
+
+  
+
+        mov.w #1234h, R5
+
+        call #LOW1
+
+        call #LOW2
+
+        ret
+
+END

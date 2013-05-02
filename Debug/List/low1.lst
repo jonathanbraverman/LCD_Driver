@@ -1,0 +1,51 @@
+###############################################################################
+#                                                                             #
+#     IAR Assembler V5.50.1.50465/W32  for MSP430 25/Apr/2013  20:12:47       #
+#     Copyright 1996-2012 IAR Systems AB.                                     #
+#                                                                             #
+#           Target option =  MSP430                                           #
+#           Source file   =  C:\Users\157_13\Pictures\multiple module\low1.s43#
+#           List file     =  C:\Users\157_13\Pictures\multiple module\Debug\List\low1.lst#
+#           Object file   =  C:\Users\157_13\Pictures\multiple module\Debug\Obj\low1.r43#
+#           Command line  =  C:\Users\157_13\Pictures\multiple module\low1.s43 #
+#                            -OC:\Users\157_13\Pictures\multiple module\Debug\Obj\ #
+#                            -s+ -M<> -w+                                     #
+#                            -LC:\Users\157_13\Pictures\multiple module\Debug\List\ #
+#                            -cE -t8 -r -D__MSP430G2553__                     #
+#                            -IC:\Program Files (x86)\IAR Systems\Embedded Workbench 6.4 Kickstart\430\INC\ #
+#                                                                             #
+###############################################################################
+
+      1    000000              #include "msp430.h"                     ;
+                                #define controlled include file
+      2    000000              
+      3    000000                      NAME    low                    ; module
+                                name
+      4    000000              
+      5    000000                      PUBLIC  low1                    ; make
+                                                                        the
+                                                                        low1
+                                                                        label
+                                                                        vissibl
+                                                                       e
+      6    000000                                                      ;
+                                outside this module
+      7    000000                      RSEG    CODE                    ; place
+  program in 'CODE' segment
+      8    000000              
+      9    000000 0343         low1:   NOP                             ; main
+                                                                        program
+     10    000002              
+     11    000002 3041                 ret
+     12    000004              
+     13    000004              END
+##############################
+#          CRC:8C32          #
+#        Errors:   0         #
+#        Warnings: 0         #
+#          Bytes: 4          #
+##############################
+
+
+
+

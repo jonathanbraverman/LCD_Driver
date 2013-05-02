@@ -1,0 +1,104 @@
+###############################################################################
+#                                                                             #
+#     IAR Assembler V5.50.1.50465/W32  for MSP430 25/Apr/2013  19:43:32       #
+#     Copyright 1996-2012 IAR Systems AB.                                     #
+#                                                                             #
+#           Target option =  MSP430                                           #
+#           Source file   =  E:\Spring 2013\CET 405\SPI\Module Construction\multiple module\SPI.s43#
+#           List file     =  E:\Spring 2013\CET 405\SPI\Module Construction\multiple module\Debug\List\SPI.lst#
+#           Object file   =  E:\Spring 2013\CET 405\SPI\Module Construction\multiple module\Debug\Obj\SPI.r43#
+#           Command line  =  E:\Spring 2013\CET 405\SPI\Module Construction\multiple module\SPI.s43 #
+#                            -OE:\Spring 2013\CET 405\SPI\Module Construction\multiple module\Debug\Obj\ #
+#                            -s+ -M<> -w+                                     #
+#                            -LE:\Spring 2013\CET 405\SPI\Module Construction\multiple module\Debug\List\ #
+#                            -cE -t8 -r -D__MSP430G2553__                     #
+#                            -IC:\Program Files (x86)\IAR Systems\Embedded Workbench 6.4 Kickstart\430\INC\ #
+#                                                                             #
+###############################################################################
+
+      1    00C000              ;***********************************************
+                               ********************************
+      2    00C000              ;
+      3    00C000              ; Module Name: SPI
+      4    00C000              ; By: Klestan Kaso
+      5    00C000              ; Date: 2/9/2013
+      6    00C000              ; Assignment: #7
+      7    00C000              ;
+      8    00C000              ;***********************************************
+                               ********************************
+      9    00C000              #include  "msp430g2553.h"
+     10    00C000              ;-----------------------------------------------
+                               --------------------------------
+     11    00C000              ; Program Defines
+     12    00C000              ;-----------------------------------------------
+                               --------------------------------
+     13    00C000                          ORG     0C000h                  ;
+  Program Reset
+     14    00C000 31408002     RESET       mov.w   #0280h,SP               ;
+  Initialize stackpointer
+     15    00C004 D242FF105700             mov.b   &CALBC1_1MHZ, &BCSCTL1  ;
+                                                                  Load
+                                                                  calibrated
+                                                                  DCO 1MHZ pt
+                                                                  1/2
+     16    00C00A D242FE105600             mov.b   &CALDCO_1MHZ, &DCOCTL   ;
+                                                                  Load
+                                                                  calibrated
+                                                                  DCO 1MHZ pt
+                                                                  2/2
+     17    00C010 B240805A2001 StopWDT     mov.w   #WDTPW+WDTHOLD,&WDTCTL  ;
+  Disable watchdog timer
+     18    00C016                       
+     19    00C016              SetupSPIMaster
+     20    00C016 D2D36900                 bis.b   #UCSWRST, &UCB0CTL1
+     21    00C01A F240C0006900             mov.b   #UCSSEL_3 , &UCB0CTL1       
+                               ; set the clock for the master SMCLK 
+     22    00C020 F24009006800             mov.b   #UCMST + UCMODE_0 + UCSYNC,
+  &UCB0CTL0
+     23    00C026 F04080004040             mov.b   #UCBRF_8, UCB0BR0           
+                                ; clock divider by 3328
+     24    00C02C F2D0A0002600             bis.b   #BIT7+BIT5, &P1SEL          
+                                        ; Enable the alternate function
+  
+     25    00C032 F2D0A0004100             bis.b   #BIT7+BIT5, &P1SEL2
+     26    00C038 D2C36900                 bic.b   #UCSWRST, &UCB0CTL1
+     27    00C03C F2D22700                 bis.b   #BIT3, &P1REN           ;
+  Enable pullup 
+     28    00C040                           
+     29    00C040              main        
+     30    00C040 0343                     nop            
+     31    00C042 F2B22000                 bit.b   #BIT3, &P1IN
+     32    00C046 062C                     jc      done
+     33    00C048 F2B20300                 bit.b   #UCB0TXIFG, &IFG2
+     34    00C04C 0328                     jnc     txfull
+     35    00C04E F240A5006F00             mov.b  #0xA5, &UCB0TXBUF
+     36    00C054              txfull         
+     37    00C054                          
+     38    00C054              done:
+     39    00C054 F53F                     jmp     main              
+                                                                       
+     40    00C056              
+     41    00C056                      
+     42    00C056              
+     43    00C056              
+     44    00C056              
+     45    00C056              
+     46    00C056              ;-----------------------------------------------
+                               --------------------------------
+     47    00C056              ;           Interrupt Vectors
+     48    00C056              ;-----------------------------------------------
+                               --------------------------------
+     49    00FFFE                          ORG     0FFFEh                  ;
+  MSP430 RESET Vector
+     50    00FFFE 00C0                     DW RESET
+     51    010000                          END
+##############################
+#          CRC:9298          #
+#        Errors:   0         #
+#        Warnings: 0         #
+#         Bytes: 88          #
+##############################
+
+
+
+

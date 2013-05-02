@@ -1,0 +1,200 @@
+###############################################################################
+#                                                                             #
+#     IAR Assembler V5.50.1.50465/W32  for MSP430 30/Apr/2013  20:54:59       #
+#     Copyright 1996-2012 IAR Systems AB.                                     #
+#                                                                             #
+#           Target option =  MSP430                                           #
+#           Source file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\asm.s43#
+#           List file     =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\asm.lst#
+#           Object file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\asm.r43#
+#           Command line  =  C:\Users\157_13\Pictures\Module Construction\multiple module\asm.s43 #
+#                            -OC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\ #
+#                            -s+ -M<> -w+                                     #
+#                            -LC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\ #
+#                            -cE -t8 -r -D__MSP430G2553__                     #
+#                            -IC:\Program Files (x86)\IAR Systems\Embedded Workbench 6.4 Kickstart\430\INC\ #
+#                                                                             #
+###############################################################################
+
+      1    00FFEC              #include "msp430.h"                     ;
+                                #define controlled include file
+      2    00FFEC              
+      3    00FFEC                      NAME    main                    ; module
+                                name
+      4    00FFEC                  
+      5    000000                      EXTERN  INIT_HARDWARE           ;
+                                                                        declare
+                                                                        an
+                                                                        externa
+                                                                       lly
+                                                                        (other
+                                                                        file)
+                                                                        defined
+                                                                        subrout
+                                                                       ine
+      6    000000                      EXTERN  READBUF
+      7    00FFEC                      EXTERN  INIT_HARDWARE
+      8    000000                      EXTERN  SETUPSPI
+      9    000000                      EXTERN  INITBUFVARS
+     10    000000                      EXTERN  InitializeLCD        
+     11    000000                      EXTERN  b_message_data
+     12    000000                      EXTERN  b_message_type
+     13    000000                      EXTERN  b_read_status_flag
+     14    000000                      EXTERN  Clear
+     15    000000                      EXTERN  SetAddress        
+     16    000000                      EXTERN  PRINTSTRING                 
+  
+     17    000000                      EXTERN  BACKLIGHT_CONTROL
+     18    000000                      PUBLIC  main                    ; make
+                                                                        the
+                                                                        main
+                                                                        label
+                                                                        visible
+                                                                        outside
+                                                                        this
+                                                                        module
+     19    00FFEC              
+     20    00FFEC              
+     21    00FFEC              
+     22    00FFEC              ;-----------------------------------------------
+                               --------------------------------
+     23    00FFEC              ;           Interrupt Vectors
+     24    00FFEC              ;-----------------------------------------------
+                               --------------------------------
+     25    00FFEC                      ORG     0FFECh                          
+                             ; MSP430 USCIB0_TX_ISR Vector
+     26    00FFEC ....                 DW      USCIB0_TX_ISR                   
+                                                                            ; 
+                                                 
+     27    00FFFE                      ORG     0FFFEh
+     28    00FFFE ....                 DC16    init                    ; set
+                                                 reset vector to 'init'
+                                                 label
+     29    010000              
+     30    010000              
+     31    000000                      RSEG    CSTACK                  ;
+  pre-declaration of segment
+     32    000000                      RSEG    CODE                    ; place
+  program in 'CODE' segment
+     33    000000              
+     34    000000 3140....     init:   MOV     #SFE(CSTACK), SP        ; set up
+                                                            stack
+     35    000004 32D2                 bis.w   #GIE, SR
+     36    000006 B012....             call #INIT_HARDWARE
+     37    00000A B012....             call #SETUPSPI
+     38    00000E B012....             call #INITBUFVARS
+     39    000012 B012....             call #InitializeLCD
+     40    000016 B012....             call #Clear
+     41    00001A                      
+     42    00001A 3A406400             mov.w #100, R10
+     43    00001E B012....             call #BACKLIGHT_CONTROL
+     44    000022                      
+     45    000022 0343         main:   NOP                              ; main
+                                                                         progra
+                                                                        m
+     46    000024                             
+     47    000024 0443                 mov  #0h, R4
+     48    000026 0543                 mov  #0h, R5
+     49    000028 B012....             call #SetAddress    
+     50    00002C              
+     51    00002C 3940....             mov.w  #HELLO, R9
+     52    000030 B012....             call    #PRINTSTRING
+     53    000034                   
+     54    000034              
+     55    000034 F63F                 JMP main                           ;
+  jump to current location '$'
+     56    000036                                                      ;
+                                (endless loop)
+     57    000036              
+     58    000036              
+     59    000036              
+     60    000036              ;-----------------------------------------------
+                               --------------------------------; Finds status
+                                of buffer and if appropriate, send out
+                                message
+     61    000036              USCIB0_TX_ISR                                   
+                                                               ; IN: Read_statu
+                               s_flag, Message_type, Message_data
+     62    000036              ;-----------------------------------------------
+                               --------------------------------; OUT:
+                                
+     63    000036              
+     64    000036 B012....               call    #READBUF                      
+                                 ; Update Message_type, Message_data, and
+  Read_status_flag
+     65    00003A                        
+     66    00003A C293....               cmp.b   #0, &b_read_status_flag       
+                                 ; Is the buffer empty?
+     67    00003E 1324                   jeq     empty_buffer                  
+                                 ; Yes, disable the interrupt
+     68    000040 003C                   jmp     message_type                  
+                                 ; No, retrieve the byte to send
+     69    000042                        
+     70    000042              message_type
+     71    000042 C293....               cmp.b   #0, &b_message_type           
+                                 ; Is the message of type 0?
+     72    000046 0124                   jeq     msg_type_0                    
+                                 ; Yes, act appropriately
+     73    000048 033C                   jmp     msg_type_1                    
+                                 ; No, act appropriately
+     74    00004A                        
+     75    00004A              msg_type_0
+     76    00004A D2C32900               bic.b   #BIT0, &P2OUT                 
+                                 ; Change P2.0 to the message type
+     77    00004E 033C                   jmp     message_data                  
+                                 ; Continue
+     78    000050              
+     79    000050              msg_type_1
+     80    000050 D2D32900               bis.b   #BIT0, &P2OUT                 
+                                 ; Change P2.0 to the message type
+     81    000054 003C                   jmp     message_data                  
+                                 ; Continue 
+     82    000056                        
+     83    000056              message_data
+     84    000056 D242....6F00           mov.b   &b_message_data, &UCB0TXBUF   
+                                                                               
+                                                                               
+                                                                        ; Move
+                                                                   the message
+                                                                   to the
+                                                                   transmit
+                                                                   buffer
+     85    00005C 003C                   jmp     last_byte_check               
+                                 ; Check if that was the last byte in the
+  buffer
+     86    00005E                        
+     87    00005E                        
+     88    00005E              last_byte_check
+     89    00005E D293....               cmp.b   #1, &b_read_status_flag       
+                                 ; Did the buffer just send out the last byte in
+  the buffer?
+     90    000062 0124                   jeq     empty_buffer                  
+                                 ; Yes, disable the interrupt
+     91    000064 0320                   jne     end_of_interrupt              
+                                 ; No, end the interrupt
+     92    000066              
+     93    000066              empty_buffer
+     94    000066 F2C20100               bic.b   #UCB0TXIE, &IE2               
+                                 ; Disable USCIB0_TX_ISR
+     95    00006A 003C                   jmp     end_of_interrupt              
+                                 ; End the interrupt
+     96    00006C                        
+     97    00006C              end_of_interrupt
+     98    00006C 0013                   reti
+     99    00006E              
+    100    00006E              
+    101    00006E 48656C6C6F00 HELLO       DB  "Hello"
+    102    000074 576F726C6431*WORLD       DB   "World1"
+    103    00007B                                                         
+                                ;
+    104    00007B                          END
+##############################
+#          CRC:7E07          #
+#        Errors:   0         #
+#        Warnings: 0         #
+#         Bytes: 127         #
+##############################
+
+
+
+

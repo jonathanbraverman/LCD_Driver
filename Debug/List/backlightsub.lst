@@ -1,0 +1,64 @@
+###############################################################################
+#                                                                             #
+#     IAR Assembler V5.50.1.50465/W32  for MSP430 25/Apr/2013  21:11:02       #
+#     Copyright 1996-2012 IAR Systems AB.                                     #
+#                                                                             #
+#           Target option =  MSP430                                           #
+#           Source file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\backlightsub.s43#
+#           List file     =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\backlightsub.lst#
+#           Object file   =  C:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\backlightsub.r43#
+#           Command line  =  C:\Users\157_13\Pictures\Module Construction\multiple module\backlightsub.s43 #
+#                            -OC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\Obj\ #
+#                            -s+ -M<> -w+                                     #
+#                            -LC:\Users\157_13\Pictures\Module Construction\multiple module\Debug\List\ #
+#                            -cE -t8 -r -D__MSP430G2553__                     #
+#                            -IC:\Program Files (x86)\IAR Systems\Embedded Workbench 6.4 Kickstart\430\INC\ #
+#                                                                             #
+###############################################################################
+
+      1    000200              #include "msp430.h"                     ;
+                                #define controlled include file
+      2    000200                      NAME    backlight            ; module
+                                name
+      3    000200              
+      4    000000                      PUBLIC  BACKLIGHT_CONTROL       ; make
+                                                                        the
+                                                                        main
+                                                                        label
+                                                                        visible
+                                                                        outside
+                                                                        this
+                                                                        file
+      5    000200                
+      6    000200                      ORG     0x200
+      7    000200                                                
+      8    000000                      RSEG    CODE                    ; place
+  program code in 'CODE' segment
+      9    000000              ;-----------------------------------------------
+                               --------------------------------; This
+                                subroutine controls the brightness of the
+                                backlight
+     10    000000               BACKLIGHT_CONTROL:                             
+                                                               ; IN: R10
+     11    000000              ;-----------------------------------------------
+                               --------------------------------; OUT: PWM at
+                                P1.6
+     12    000000              
+     13    000000 824A7401             MOV     R10, &TA0CCR1           ; Move
+                                                     the backlight number to
+                                                     TA0CCR1 to modify the duty
+                                                     cycle
+     14    000004                      
+     15    000004 3041                 RET
+     16    000006              
+     17    000006              END
+##############################
+#          CRC:BAA3          #
+#        Errors:   0         #
+#        Warnings: 0         #
+#          Bytes: 6          #
+##############################
+
+
+
+

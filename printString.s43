@@ -1,0 +1,51 @@
+        NAME    printString                   ; module name
+        EXTERN  CREATEMESSAGE                 ; declare externally defined CREATEMESSAGE
+        EXTERN  b_invalid_msg                 ; declare externally defined bad message flag
+        
+        PUBLIC  PRINTSTRING                   ; make the main label visible outside this file
+  
+        ORG    0x200      
+                                        
+                                        
+        RSEG    CODE                    ; place program code in 'CODE' segment
+
+
+
+;-------------------------------------------------------------------------------PURPOSE: sends out a string to get printed
+PRINTSTRING:;                                                                   IN: pointer to string in R9
+;-------------------------------------------------------------------------------OUT: streams a char at a time to createMessage
+        ; R7 is the dataType -- setting it to 1 indicates data (not control)
+        ; R8 is the data contents for createmessage
+        ; R9 is the string pointer
+        
+        CMP.W   #0x01FF, R9              ; verify that the string pointer isn't out of bounds of RAM
+        JLO     dataNotInRam             ; if its out of bounds low, jump
+        CMP.W   #0x09F1, R9              ; verify that the string pointer isn't out of bounds of RAM
+        JHS     dataNotInRam             ; if its out of bounds high, jump
+        
+        PUSH    R7                       ; preserve the registers 
+        PUSH    R8                       ; 
+        MOV.W   #1, R7                   ; set the data type to data
+        
+
+       sendAnother:
+        CMP.B   #0x00, 0(R9)             ; see if the pointer is pointing to the null character
+        JZ      endPrintString           ; if it points to null, end the subroutine
+        MOV.B   @R9+, R8                 ; move the next character to the parameter for createMessage
+        CALL    #CREATEMESSAGE           ; call create message with the parameter set
+       ; CMP.B   #1, &b_invalid_msg      ; see if createMessage returned bad 
+       ; badMessage:
+       ; JZ      badMessage              ; infinite loop for debugging
+        JMP     sendAnother              ; do until pointer points to null
+       
+       dataNotInRam:                     ; to be called when the string pointer is invalid
+       
+       endPrintString:
+       POP      R8                       ; restore the registers
+       POP      R7
+       
+      RET
+      
+
+
+END

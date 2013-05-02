@@ -1,0 +1,26 @@
+#include "msp430.h"                     ; #define controlled include file
+
+            Name SPI            
+
+            
+            PUBLIC SETUPSPI  
+            
+            RSEG CODE
+
+
+         
+SETUPSPI
+            bis.b   #UCSWRST, &UCB0CTL1
+            mov.b   #UCSSEL_3 , &UCB0CTL1                                     ; set the clock for the master SMCLK 
+            mov.b   #UCMST + UCMODE_0 + UCSYNC, &UCB0CTL0
+            mov.b   #UCBRF_8, UCB0BR0                                          ; clock divider by 3328
+            bis.b   #BIT7+BIT5, &P1SEL                                                 ; Enable the alternate function 
+            bis.b   #BIT7+BIT5, &P1SEL2
+            bic.b   #UCSWRST, &UCB0CTL1
+            bis.b   #BIT3, &P1REN           ; Enable pullup 
+             
+       
+
+               ret  
+
+               END

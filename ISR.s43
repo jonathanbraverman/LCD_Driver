@@ -1,0 +1,52 @@
+;*******************************************************************************
+; USCIB0_TX_ISR  
+;*******************************************************************************
+#include  "msp430g2553.h"
+
+;-------------------------------------------------------------------------------; Finds status of buffer and if appropriate, send out message
+USCIB0_TX_ISR                                                                   ; IN: Read_status_flag, Message_type, Message_data
+;-------------------------------------------------------------------------------; OUT: 
+
+          call    #READBUF                                                      ; Update Message_type, Message_data, and Read_status_flag
+          
+          cmp.b   #0, &b_read_status_flag                                       ; Is the buffer empty?
+          jeq     empty_buffer                                                  ; Yes, disable the interrupt
+          jmp     message_type                                                  ; No, retrieve the byte to send
+          
+message_type
+          cmp.b   #0, &b_message_type                                           ; Is the message of type 0?
+          jeq     msg_type_0                                                    ; Yes, act appropriately
+          jmp     msg_type_1                                                    ; No, act appropriately
+          
+msg_type_0
+          bic.b   #BIT0, &P2OUT                                                 ; Change P2.0 to the message type
+          jmp     message_data                                                  ; Continue
+
+msg_type_1
+          bis.b   #BIT0, &P2OUT                                                 ; Change P2.0 to the message type
+          jmp     message_data                                                  ; Continue 
+          
+message_data
+          mov.b   &b_message_data, &UCB0TXBUF                                   ; Move the message to the transmit buffer
+          jmp     last_byte_check                                               ; Check if that was the last byte in the buffer
+          
+          
+last_byte_check
+          cmp.b   #1, &b_read_status_flag                                       ; Did the buffer just send out the last byte in the buffer?
+          jeq     empty_buffer                                                  ; Yes, disable the interrupt
+          jne     end_of_interrupt                                              ; No, end the interrupt
+
+empty_buffer
+          bic.b   #UCB0TXIE, &IE2                                               ; Disable USCIB0_TX_ISR
+          jmp     end_of_interrupt                                              ; End the interrupt
+          
+end_of_interrupt
+          reti
+
+
+;-------------------------------------------------------------------------------
+;           Interrupt Vectors
+;-------------------------------------------------------------------------------
+            ORG     0FFECh                                                      ; MSP430 USCIB0_TX_ISR Vector
+            DW      USCIB0_TX_ISR                                               ;
+            END
