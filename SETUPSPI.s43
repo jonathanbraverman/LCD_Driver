@@ -17,8 +17,7 @@ SETUPSPI
             bis.b   #BIT7+BIT5, &P1SEL                                                 ; Enable the alternate function 
             bis.b   #BIT7+BIT5, &P1SEL2
             bic.b   #UCSWRST, &UCB0CTL1
-            bis.b   #BIT3, &P1REN           ; Enable pullup 
-             
+           
        
 
                ret  

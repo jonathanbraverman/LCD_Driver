@@ -95,9 +95,9 @@ Clear:
 SetAddress: ; Sets the cursor to the right location
 ;-------------------------------------------------------------------------------
 
-            cmp.w   R4, 0x0000
+            cmp.w   #0x0000, R4
             jeq     firstRow
-            cmp.w   R4, 0x0001
+            cmp.w   #0x0001, R4
             jeq     secondRow
             jmp     LeaveSub
             

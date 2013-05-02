@@ -4,7 +4,6 @@
     
         EXTERN  INIT_HARDWARE           ; declare an externally (other file) defined subroutine
         EXTERN  READBUF
-        EXTERN  INIT_HARDWARE
         EXTERN  SETUPSPI
         EXTERN  INITBUFVARS
         EXTERN  InitializeLCD        
@@ -32,6 +31,9 @@
         RSEG    CODE                    ; place program in 'CODE' segment
 
 init:   MOV     #SFE(CSTACK), SP        ; set up stack
+        mov.b   &CALBC1_1MHZ, &BCSCTL1      ; Load calibrated DCO 1MHZ pt 1/2
+        mov.b   &CALDCO_1MHZ, &DCOCTL       ; Load calibrated DCO 1MHZ pt 2/2
+StopWDT mov.w   #WDTPW+WDTHOLD,&WDTCTL      ; Disable watchdog timer        
         bis.w   #GIE, SR
         call #INIT_HARDWARE
         call #SETUPSPI

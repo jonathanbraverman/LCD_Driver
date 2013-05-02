@@ -4,18 +4,18 @@
 
                 PUBLIC  INIT_HARDWARE           ; make the main label visible outside this file
   
-                ORG     0x200
+                
                                   
                 RSEG    CODE                    ; place program code in 'CODE' segment
 ;-------------------------------------------------------------------------------; All pins are set to the required settings
  INIT_HARDWARE:                                                                 ; IN: None
 ;-------------------------------------------------------------------------------; OUT: Setup pins
 
-SetupP1     	BIS.B   #11100000b, &P1DIR	; P1.5, 1.6, and 1.7 as output
-                BIS.B   #00000111b, &P1DIR	; P2.0, 2.1, and 2.2 as output
+SetupGPIO     	BIS.B   #11100000b, &P1DIR	; P1.5, 1.6, and 1.7 as output
+                BIS.B   #00000111b, &P2DIR	; P2.0, 2.1, and 2.2 as output
             	BIS.B   #01000000b, &P1SEL      ; P1.6 controlled by PWM
-                BIC.B   #00000010b, &P1SEL      ; Set chip select to low since it is active low
-                BIS.B   #00000100b, &P1DIR	; Set reset to high since it is active low
+                BIC.B   #00000010b, &P2OUT      ; Set chip select to low since it is active low
+                BIS.B   #00000100b, &P2OUT	; Set reset to high since it is active low
 
 SetupC0	    	MOV.W   #100,&TA0CCR0          ; PWM period, 1MHz clock -> 1000000/100 = 10000Hz (1/10000s period)
 SetupC1		BIS.W	#OUTMOD_7, &TA0CCTL1    ; CCR1 reset/set
