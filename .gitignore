@@ -1,5 +1,17 @@
 # Object files
 *.o
+*.d43
+*.r43
+Debug/
+
+# Debugger Watchwindows
+*.wsdt
+*.sfr
+
+# IDE files
+*.dep
+*.ewd
+settings/
 
 # Libraries
 *.lib
@@ -15,3 +27,4 @@
 *.exe
 *.out
 *.app
+*.bat

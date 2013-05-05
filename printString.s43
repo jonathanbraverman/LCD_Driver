@@ -18,10 +18,10 @@ PRINTSTRING:;                                                                   
         ; R8 is the data contents for createmessage
         ; R9 is the string pointer
         
-        CMP.W   #0x01FF, R9              ; verify that the string pointer isn't out of bounds of RAM
-        JLO     dataNotInRam             ; if its out of bounds low, jump
-        CMP.W   #0x09F1, R9              ; verify that the string pointer isn't out of bounds of RAM
-        JHS     dataNotInRam             ; if its out of bounds high, jump
+        ;CMP.W   #0x01FF, R9              ; verify that the string pointer isn't out of bounds of RAM
+        ;JLO     dataNotInRam             ; if its out of bounds low, jump
+        ;CMP.W   #0x09F1, R9              ; verify that the string pointer isn't out of bounds of RAM
+        ;JHS     dataNotInRam             ; if its out of bounds high, jump
         
         PUSH    R7                       ; preserve the registers 
         PUSH    R8                       ; 

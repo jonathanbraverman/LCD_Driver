@@ -14,8 +14,8 @@
 SetupGPIO     	BIS.B   #11100000b, &P1DIR	; P1.5, 1.6, and 1.7 as output
                 BIS.B   #00000111b, &P2DIR	; P2.0, 2.1, and 2.2 as output
             	BIS.B   #01000000b, &P1SEL      ; P1.6 controlled by PWM
-                BIC.B   #00000010b, &P2OUT      ; Set chip select to low since it is active low
-                BIS.B   #00000100b, &P2OUT	; Set reset to high since it is active low
+                ;BIC.B   #00000010b, &P2OUT      ; Set chip select to low since it is active low
+                ;BIS.B   #00000100b, &P2OUT	; Set reset to high since it is active low
 
 SetupC0	    	MOV.W   #100,&TA0CCR0          ; PWM period, 1MHz clock -> 1000000/100 = 10000Hz (1/10000s period)
 SetupC1		BIS.W	#OUTMOD_7, &TA0CCTL1    ; CCR1 reset/set
@@ -23,7 +23,8 @@ SetupC1		BIS.W	#OUTMOD_7, &TA0CCTL1    ; CCR1 reset/set
       
 SetupTA     	MOV.W   #TASSEL_2+MC_1,&TACTL   ; SMLCK, count up mode
 
-                MOV.W   0h, R10	                ; Register used to hold backlight brightness number (used to change TA0CCR1 to modify the duty cycle)
+                ;MOV.W   0h, R10	                ; Register used to hold backlight brightness number (used to change TA0CCR1 to modify the duty cycle)
+
 
                 RET
 

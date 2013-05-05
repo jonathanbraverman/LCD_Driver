@@ -24,38 +24,34 @@ b_invalid_msg   DS _byte                                                        
 ;-------------------------------------------------------------------------------; Prepare and place message into Ring Buffer
 CREATEMESSAGE                                                                   ; IN: R7, R8, b_write_status_flag
 ;-------------------------------------------------------------------------------; OUT: b_invalid_msg
-error_checkR7
-	cmp.b   #0, R7 								; Is R7 0?
-	jeq     error_checkR8							; R7 is a valid value
-	cmp.b   #1, R7								; Is R7 1?
-	jeq     error_checkR8							; R7 is a valid value
-	jne     invalid_value							; Invalid value, report error
 
-error_checkR8
-	cmp.w   #256, R8							; Is data in R8 not a byte?
-	jhs     invalid_value						        ; Yes, corrupt message, report error
-	jmp     write_msg						        ; Valid message, begin placing it in the buffer
 
-write_msg
-        cmp.b   #1, &b_write_status_flag       					; Is the buffer full?
-        jeq     write_msg							; Yes, check the buffer status again
-        SWPB    R8                                                              ; Move value of message in R8 to the upper byte
-        add.w   R8, R7                                                          ; Add the actual message to the message type
-check_buf
-        call    #WRITEBUF                                                       ; Store the message in the Ring Buffer
-        cmp.b   #1, &b_write_status_flag       				        ; Is the buffer full?
-        jeq     check_buf							; Yes, check the buffer status again
-        sub.w   R8, R7                                                          ; Restore original R8/message value
-        SWPB    R8                                                              ; Restore original R7/message type value
-        bis.b   #UCB0TXIE, &IE2                                                 ; Enable the USCIB0_TX_ISR
-	bic.b   #1, &b_invalid_msg						; Alert higher process that message was written to the buffer
-	jmp     end_of_create
+          BIC.B   #BIT1, &P2OUT
+      
+          cmp.b   #BIT0, R7
+          JEQ     msg_type_1
+      
+      
+msg_type_0
+          bic.b   #BIT0, &P2OUT                                                 ; Change P2.0 to the message type
+          jmp     message_data                                                  ; Continue
 
-invalid_value
-	bis.b   #1, &b_invalid_msg						; Alert higher process that message was not written to the buffer
-	jmp     end_of_create
+msg_type_1
+          bis.b   #BIT0, &P2OUT                                                 ; Change P2.0 to the message type
+          jmp     message_data                                                  ; Continue   
 
-end_of_create
-        ret
-            
+message_data
+
+          mov.b   R8, &UCB0TXBUF                                   ; Move the message to the transmit buffer
+
+finish_sending_byte
+
+          ;bit.b   #UCB0TXIFG, &IFG2
+          bit.b   #UCBUSY, &UCB0STAT
+          JC     finish_sending_byte
+
+          NOP
+          BIS.B   #BIT1, &P2OUT
+          ret
+
 END
