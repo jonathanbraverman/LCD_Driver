@@ -1,106 +1,62 @@
 #include "msp430.h"                     ; #define controlled include file
 
         NAME    main                    ; module name
-    
-        EXTERN  INIT_HARDWARE           ; declare an externally (other file) defined subroutine
-        EXTERN  READBUF
+
+        PUBLIC  main                    ; make the main label vissible
+                                         ; outside this module
         EXTERN  SETUPSPI
-        EXTERN  INITBUFVARS
-        EXTERN  InitializeLCD        
-        EXTERN  b_message_data
-        EXTERN  b_message_type
-        EXTERN  b_read_status_flag
-        EXTERN  Clear
-        EXTERN  SetAddress        
-        EXTERN  PRINTSTRING                  
-        EXTERN  BACKLIGHT_CONTROL
-        PUBLIC  main                    ; make the main label visible outside this module
-
-
-
-;-------------------------------------------------------------------------------
-;           Interrupt Vectors
-;-------------------------------------------------------------------------------
-        ORG     0FFECh                                                      ; MSP430 USCIB0_TX_ISR Vector
-        DW      USCIB0_TX_ISR                                               ;  
+        EXTERN  CREATEMESSAGE
         ORG     0FFFEh
         DC16    init                    ; set reset vector to 'init' label
-
 
         RSEG    CSTACK                  ; pre-declaration of segment
         RSEG    CODE                    ; place program in 'CODE' segment
 
 init:   MOV     #SFE(CSTACK), SP        ; set up stack
-        mov.b   &CALBC1_1MHZ, &BCSCTL1      ; Load calibrated DCO 1MHZ pt 1/2
-        mov.b   &CALDCO_1MHZ, &DCOCTL       ; Load calibrated DCO 1MHZ pt 2/2
-StopWDT mov.w   #WDTPW+WDTHOLD,&WDTCTL      ; Disable watchdog timer        
-        bis.w   #GIE, SR
-        call #INIT_HARDWARE
-        call #SETUPSPI
-        call #INITBUFVARS
-        call #InitializeLCD
-        call #Clear
-        
-        mov.w #100, R10
-        call #BACKLIGHT_CONTROL
-        
-main:   NOP                              ; main program
-               
-        mov  #0h, R4
-        mov  #0h, R5
-        call #SetAddress    
 
-        mov.w  #HELLO, R9
-        call    #PRINTSTRING
-     
+      bis.b  #BIT3, &P1REN
+      mov.b #0, &P1OUT
+;  //P1DIR |= BIT0 + BIT5;                     //
+      CALL  #SETUPSPI
+      
+MOV.W   #WDTPW+WDTHOLD,&WDTCTL  ; Stop watchdog timer
+        
 
-        JMP main                           ; jump to current location '$'
+main:   NOP                             ; main program
+
+
+        mov.b   #0xA5, R8       ;                    // Transmit first character        
+        call   #CREATEMESSAGE
+
+        mov.b   #0xB6, R8       ;                    // Transmit first character        
+        call   #CREATEMESSAGE
+
+        mov.b   #0xC7, R8       ;                    // Transmit first character        
+        call   #CREATEMESSAGE
+
+        mov.b   #0xD8, R8       ;                    // Transmit first character        
+        call   #CREATEMESSAGE
+
+        
+        
+        JMP $                          ; jump to current location '$'
                                         ; (endless loop)
+                                        
+                                        
+                                        
+               
+               
+ALTSETUPSPI
+      mov.b #BIT5 + BIT7, &P1SEL
+      mov.b #BIT5 + BIT7, &P1SEL2
+      bis.b #UCCKPL + UCMSB + UCMST + UCSYNC, &UCB0CTL0  ;// 3-pin, 8-bit SPI master 
+      bis.b #UCSSEL_2, UCB0CTL1       ;              // SMCLK
+      mov.b #0x02, &UCB0BR0          ;                // /2
+      mov.b #0, &UCB0BR1            ;                   //
+      bic.b #UCSWRST, &UCB0CTL1   ;                  // **Initialize USCI state machine**
+  
 
 
-
-;-------------------------------------------------------------------------------; Finds status of buffer and if appropriate, send out message
-USCIB0_TX_ISR                                                                   ; IN: Read_status_flag, Message_type, Message_data
-;-------------------------------------------------------------------------------; OUT: 
-
-          call    #READBUF                                                      ; Update Message_type, Message_data, and Read_status_flag
-          
-          cmp.b   #0, &b_read_status_flag                                       ; Is the buffer empty?
-          jeq     empty_buffer                                                  ; Yes, disable the interrupt
-          jmp     message_type                                                  ; No, retrieve the byte to send
-          
-message_type
-          cmp.b   #0, &b_message_type                                           ; Is the message of type 0?
-          jeq     msg_type_0                                                    ; Yes, act appropriately
-          jmp     msg_type_1                                                    ; No, act appropriately
-          
-msg_type_0
-          bic.b   #BIT0, &P2OUT                                                 ; Change P2.0 to the message type
-          jmp     message_data                                                  ; Continue
-
-msg_type_1
-          bis.b   #BIT0, &P2OUT                                                 ; Change P2.0 to the message type
-          jmp     message_data                                                  ; Continue 
-          
-message_data
-          mov.b   &b_message_data, &UCB0TXBUF                                   ; Move the message to the transmit buffer
-          jmp     last_byte_check                                               ; Check if that was the last byte in the buffer
-          
-          
-last_byte_check
-          cmp.b   #1, &b_read_status_flag                                       ; Did the buffer just send out the last byte in the buffer?
-          jeq     empty_buffer                                                  ; Yes, disable the interrupt
-          jne     end_of_interrupt                                              ; No, end the interrupt
-
-empty_buffer
-          bic.b   #UCB0TXIE, &IE2                                               ; Disable USCIB0_TX_ISR
-          jmp     end_of_interrupt                                              ; End the interrupt
-          
-end_of_interrupt
-          reti
-
-
-HELLO       DB  "Hello"
-WORLD       DB   "World1"
-                                            ;
-            END
+       ret
+       
+        END

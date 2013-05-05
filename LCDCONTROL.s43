@@ -12,7 +12,17 @@
 InitializeLCD:
 ;-------------------------------------------------------------------------------
 
-        mov.b #0, R7                    ;0 to R7 = Control Message being sent
+        BIC.B   #BIT2, &P2OUT	; Set reset to low
+
+        mov.b #30, R7                    ;0 to R7 = Control Message being sent
+        
+        BIS.B   #BIT2, &P2OUT	; Set reset to high since it is active low
+        
+delay        
+        NOP
+        sub.b  #1, R7
+        JNZ    delay
+          
 ;Initializing by Instruction
         mov.b #0x30, R8                 ;Function Set (0 0 1 DL N DH 0 IS)
         Call #CREATEMESSAGE
